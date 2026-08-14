@@ -2,5 +2,5 @@
 # authenticates through the 1Password SSH agent instead.
 *
 !.gitignore
-!config
+!config.tmpl
 !*.pub
