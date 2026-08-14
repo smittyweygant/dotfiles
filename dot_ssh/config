@@ -1,0 +1,31 @@
+Host github.com
+  IdentityFile ~/.ssh/github_ssh_2026_04.pub
+
+Host EC2-HOST-1-REDACTED
+  IdentityFile ~/.ssh/aws_ssh_key_pair_2025_02_02.pub
+
+Host EC2-HOST-2-REDACTED
+  IdentityFile ~/.ssh/aws_ssh_key_pair_2025_02_02.pub
+
+Host rpi
+  HostName RPI-LAN-IP-REDACTED
+  IdentityFile ~/.ssh/pi_ssh_key_2025.pub
+
+Host beelink
+  HostName BEELINK-LAN-IP-REDACTED
+  IdentityFile ~/.ssh/id_rsa.pub
+
+Host smitty-beelink.tailscale
+  HostName BEELINK-TAILSCALE-HOST-REDACTED
+  IdentityFile ~/.ssh/id_rsa.pub
+
+Host *
+#  ControlMaster auto
+#  ControlPersist 10m
+#  ServerAliveInterval 20
+#  ServerAliveCountMax 1
+#  ControlPath /Users/smittyweygant/.ssh/sockets/%C
+#  ControlPath /Users/smittyweygant/.ssh/sockets/%r@%h-%p
+
+Host *
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

@@ -1,0 +1,6 @@
+# Allowlist only — private keys must never live here. Everything
+# authenticates through the 1Password SSH agent instead.
+*
+!.gitignore
+!config
+!*.pub

@@ -1,0 +1,5 @@
+# All SSH keys live in the Development vault; this scopes the agent
+# to serve every key from that vault rather than listing each one.
+
+[[ssh-keys]]
+vault = "Development"
