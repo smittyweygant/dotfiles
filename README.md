@@ -5,6 +5,7 @@ Personal macOS toolchain and configuration, managed with [chezmoi](https://www.c
 ## What's here
 
 - Shell config (zsh + oh-my-zsh + Powerlevel10k), editor config (vim), git config, and assorted CLI tool dotfiles — all managed as `dot_*` files that chezmoi renders into `$HOME`.
+- `dot_ssh/config` + `dot_config/1Password/ssh/agent.toml` — SSH client config and 1Password SSH agent scoping. No private keys are ever tracked here; see [SSH keys](#ssh-keys) below.
 - `run_once_before_10-macos-defaults.sh` — macOS system preference tweaks (`defaults write` commands), runs once on a fresh machine.
 - `run_once_before_05-create-vim-dirs.sh` — creates vim's backup/swap/undo directories.
 - `Brewfile` + `run_onchange_install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
@@ -44,9 +45,18 @@ then review the diff before committing.
 
 ## Secrets
 
-- SSH keys live in the **1Password SSH agent**, not `~/.ssh`.
-- AWS credentials use 1Password's AWS CLI shell plugin, not a static `~/.aws/credentials`.
-- Shell env secrets (API keys, tokens) are pulled lazily in `dot_zshrc.tmpl` via `op read 'op://...'` at shell startup — never rendered into the file itself and never committed.
+- Shell env secrets (API keys, tokens) are pulled lazily in `dot_zshrc` via `op read 'op://...'` at shell startup — never rendered into the file itself and never committed.
+- **AWS credentials are currently still a static `~/.aws/credentials` file — not yet migrated to 1Password.** This is a known gap, not a completed step; treat it the same as any other unrotated static credential until it's addressed.
+
+### SSH keys
+
+All private keys live in the **Development** vault in 1Password — none are stored in `~/.ssh` or this repo. The 1Password SSH agent serves them transparently:
+
+- `dot_ssh/config` sets `IdentityAgent` to 1Password's socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`) under the catch-all `Host *` block. Per-host `IdentityFile` lines point at `.pub` files only — these just pin *which* key to offer for a given host; the agent supplies the actual private material.
+- `dot_config/1Password/ssh/agent.toml` scopes the agent to the Development vault (`vault = "Development"`). Creating a custom `agent.toml` overrides 1Password's default vault behavior, so every key that should be available over SSH needs to live in that vault — dropping a new key into a different vault silently won't show up in `ssh-add -l` until moved.
+- `dot_ssh/.gitignore` is a repo-only allowlist (`config` and `*.pub` only) so this directory can never accidentally pick up a real private key, even if something is copied in carelessly later. It's not deployed to `$HOME` itself — chezmoi skips literal dotfiles in the source tree.
+
+**New machine**: after signing into the 1Password app (step 1 above) and running `chezmoi apply`, `dot_ssh/config` and `agent.toml` land automatically. The one manual step chezmoi can't do: open each SSH Key item in 1Password (or drag the key file onto the 1Password window if a key isn't in the vault yet) so it's available to drag/import — the keys themselves live in your 1Password account and sync there, not through this repo.
 
 ## Thanks to…
 
