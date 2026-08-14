@@ -1,0 +1,20 @@
+# Personal host entries (home network, cloud instances) live in
+# ~/.ssh/config.local — gitignored, never part of this public repo.
+# Recreate that file by hand on a new machine. Must stay the first
+# directive in this file — Include silently fails to apply if it
+# comes after any Host block (reproduced on OpenSSH_10.2p1/LibreSSL).
+Include config.local
+
+Host github.com
+  IdentityFile ~/.ssh/github_ssh_2026_04.pub
+
+Host *
+#  ControlMaster auto
+#  ControlPersist 10m
+#  ServerAliveInterval 20
+#  ServerAliveCountMax 1
+#  ControlPath /Users/smittyweygant/.ssh/sockets/%C
+#  ControlPath /Users/smittyweygant/.ssh/sockets/%r@%h-%p
+
+Host *
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
