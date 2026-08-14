@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# MASfile hash: {{ include "MASfile" | sha256sum }}
+# Re-runs automatically whenever MASfile's content changes.
+set -euo pipefail
+
+if ! command -v mas >/dev/null 2>&1; then
+  echo "mas not found — should have been installed via Brewfile first"
+  exit 1
+fi
+
+if ! mas account >/dev/null 2>&1; then
+  echo "Not signed in to the Mac App Store — sign in via the App Store app first, then re-run: chezmoi apply"
+  exit 0
+fi
+
+while read -r id name; do
+  [ -z "$id" ] && continue
+  case "$id" in \#*) continue ;; esac
+  mas install "$id" || echo "Failed to install $name ($id) — may already be installed under a different Apple ID"
+done < "{{ .chezmoi.sourceDir }}/MASfile"
