@@ -16,4 +16,3 @@ Thumbs.db
 # Never track credential material that lands in the repo root
 /.ssh/
 /.aws/
-/.claude/
