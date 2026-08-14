@@ -1,0 +1,7 @@
+# Repo-management files that should never be deployed into $HOME.
+README.md
+LICENSE-MIT.txt
+init
+Brewfile
+MASfile
+APPLICATIONS.md

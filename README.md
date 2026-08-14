@@ -1,114 +1,53 @@
-# Mathias’s dotfiles
+# Smitty's dotfiles
 
-## Smitty comments
-Edits
+Personal macOS toolchain and configuration, managed with [chezmoi](https://www.chezmoi.io/). Originally forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles); restructured to be reproducible on a fresh machine.
 
-![Screenshot of my shell prompt](https://i.imgur.com/EkEtphC.png)
+## What's here
 
-## Installation
+- Shell config (zsh + oh-my-zsh + Powerlevel10k), editor config (vim), git config, and assorted CLI tool dotfiles — all managed as `dot_*` files that chezmoi renders into `$HOME`.
+- `run_once_before_10-macos-defaults.sh` — macOS system preference tweaks (`defaults write` commands), runs once on a fresh machine.
+- `run_once_before_05-create-vim-dirs.sh` — creates vim's backup/swap/undo directories.
+- `Brewfile` + `run_onchange_install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
+- `MASfile` + `run_onchange_install-mas-apps.sh.tmpl` — Mac App Store apps via [`mas`](https://github.com/mas-cli/mas).
+- `APPLICATIONS.md` — apps installed outside Homebrew/the App Store (direct download, MDM) that can't be scripted; a manual-reinstall checklist.
+- `init/` — app-specific settings (Sublime Text, iTerm2/Terminal color profiles, Spectacle) that need manual import; not chezmoi-managed.
 
-**Warning:** If you want to give these dotfiles a try, you should first fork this repository, review the code, and remove things you don’t want or need. Don’t blindly use my settings unless you know what that entails. Use at your own risk!
+Secrets (SSH keys, AWS credentials, API tokens) are **not** stored here — see [Secrets](#secrets) below.
 
-### Using Git and the bootstrap script
+## New machine setup
 
-You can clone the repository wherever you want. (I like to keep it in `~/Projects/dotfiles`, with `~/dotfiles` as a symlink.) The bootstrapper script will pull in the latest version and copy the files to your home folder.
+1. Install [1Password](https://1password.com/) and the 1Password CLI, sign in, and enable the SSH agent + CLI integration (Settings → Developer). This is the one manual gate — everything else here depends on `op` being signed in.
+2. Install Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+3. Install chezmoi and apply this repo:
+   ```bash
+   brew install chezmoi
+   chezmoi init --apply git@github.com:smittyweygant/dotfiles.git
+   ```
+   This clones the repo, runs the `run_once_` setup scripts (macOS defaults, vim dirs), renders all `dot_*` files into `$HOME`, and runs the `run_onchange_` scripts (Homebrew bundle, MAS apps).
+4. Work through `APPLICATIONS.md` for anything that can't be scripted.
 
-```bash
-git clone https://github.com/mathiasbynens/dotfiles.git && cd dotfiles && source bootstrap.sh
-```
-
-To update, `cd` into your local `dotfiles` repository and then:
-
-```bash
-source bootstrap.sh
-```
-
-Alternatively, to update while avoiding the confirmation prompt:
-
-```bash
-set -- -f; source bootstrap.sh
-```
-
-### Git-free install
-
-To install these dotfiles without Git:
+## Day-to-day usage
 
 ```bash
-cd; curl -#L https://github.com/mathiasbynens/dotfiles/tarball/main | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.osx,LICENSE-MIT.txt}
+chezmoi edit ~/.zshrc      # opens the source file for editing
+chezmoi diff               # preview what would change
+chezmoi apply -v           # apply changes to $HOME
 ```
 
-To update later on, just run that command again.
-
-### Specify the `$PATH`
-
-If `~/.path` exists, it will be sourced along with the other files, before any feature testing (such as [detecting which version of `ls` is being used](https://github.com/mathiasbynens/dotfiles/blob/aff769fd75225d8f2e481185a71d5e05b76002dc/.aliases#L21-L26)) takes place.
-
-Here’s an example `~/.path` file that adds `/usr/local/bin` to the `$PATH`:
+To pick up a package you just installed by hand into the tracked Brewfile:
 
 ```bash
-export PATH="/usr/local/bin:$PATH"
+brew bundle dump --file=Brewfile --describe --force
 ```
 
-### Add custom commands without creating a new fork
+then review the diff before committing.
 
-If `~/.extra` exists, it will be sourced along with the other files. You can use this to add a few custom commands without the need to fork this entire repository, or to add commands you don’t want to commit to a public repository.
+## Secrets
 
-My `~/.extra` looks something like this:
-
-```bash
-# Git credentials
-# Not in the repository, to prevent people from accidentally committing under my name
-GIT_AUTHOR_NAME="Mathias Bynens"
-GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-git config --global user.name "$GIT_AUTHOR_NAME"
-GIT_AUTHOR_EMAIL="mathias@mailinator.com"
-GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
-git config --global user.email "$GIT_AUTHOR_EMAIL"
-```
-
-You could also use `~/.extra` to override settings, functions and aliases from my dotfiles repository. It’s probably better to [fork this repository](https://github.com/mathiasbynens/dotfiles/fork) instead, though.
-
-### Sensible macOS defaults
-
-When setting up a new Mac, you may want to set some sensible macOS defaults:
-
-```bash
-./.macos
-```
-
-### Install Homebrew formulae
-
-When setting up a new Mac, you may want to install some common [Homebrew](https://brew.sh/) formulae (after installing Homebrew, of course):
-
-```bash
-./brew.sh
-```
-
-Some of the functionality of these dotfiles depends on formulae installed by `brew.sh`. If you don’t plan to run `brew.sh`, you should look carefully through the script and manually install any particularly important ones. A good example is Bash/Git completion: the dotfiles use a special version from Homebrew.
-
-## Feedback
-
-Suggestions/improvements
-[welcome](https://github.com/mathiasbynens/dotfiles/issues)!
-
-## Author
-
-| [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](http://twitter.com/mathias "Follow @mathias on Twitter") |
-|---|
-| [Mathias Bynens](https://mathiasbynens.be/) |
+- SSH keys live in the **1Password SSH agent**, not `~/.ssh`.
+- AWS credentials use 1Password's AWS CLI shell plugin, not a static `~/.aws/credentials`.
+- Shell env secrets (API keys, tokens) are pulled lazily in `dot_zshrc.tmpl` via `op read 'op://...'` at shell startup — never rendered into the file itself and never committed.
 
 ## Thanks to…
 
-* @ptb and [his _macOS Setup_ repository](https://github.com/ptb/mac-setup)
-* [Ben Alman](http://benalman.com/) and his [dotfiles repository](https://github.com/cowboy/dotfiles)
-* [Cătălin Mariș](https://github.com/alrra) and his [dotfiles repository](https://github.com/alrra/dotfiles)
-* [Gianni Chiappetta](https://butt.zone/) for sharing his [amazing collection of dotfiles](https://github.com/gf3/dotfiles)
-* [Jan Moesen](http://jan.moesen.nu/) and his [ancient `.bash_profile`](https://gist.github.com/1156154) + [shiny _tilde_ repository](https://github.com/janmoesen/tilde)
-* Lauri ‘Lri’ Ranta for sharing [loads of hidden preferences](https://web.archive.org/web/20161104144204/http://osxnotes.net/defaults.html)
-* [Matijs Brinkhuis](https://matijs.brinkhu.is/) and his [dotfiles repository](https://github.com/matijs/dotfiles)
-* [Nicolas Gallagher](http://nicolasgallagher.com/) and his [dotfiles repository](https://github.com/necolas/dotfiles)
-* [Sindre Sorhus](https://sindresorhus.com/)
-* [Tom Ryder](https://sanctum.geek.nz/) and his [dotfiles repository](https://sanctum.geek.nz/cgit/dotfiles.git/about)
-* [Kevin Suttle](http://kevinsuttle.com/) and his [dotfiles repository](https://github.com/kevinSuttle/dotfiles) and [macOS-Defaults project](https://github.com/kevinSuttle/macOS-Defaults), which aims to provide better documentation for [`~/.macos`](https://mths.be/macos)
-* [Haralan Dobrev](https://hkdobrev.com/)
-* Anyone who [contributed a patch](https://github.com/mathiasbynens/dotfiles/contributors) or [made a helpful suggestion](https://github.com/mathiasbynens/dotfiles/issues)
+This repo started as a fork of [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles) — see that project for the full list of original credits and inspirations.
