@@ -92,8 +92,6 @@ cask "ngrok"
 cask "obsidian"
 # Control your tools with a few keystrokes
 cask "raycast"
-# Store SSH keys in the Secure Enclave
-cask "secretive"
 # MySQL/MariaDB database management
 cask "sequel-ace"
 # Instant messaging application focusing on security
