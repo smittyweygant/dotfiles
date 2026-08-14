@@ -45,3 +45,8 @@ export PATH="$HOME/.local/bin:$PATH"
 # in with CLI integration enabled.
 export ANTHROPIC_API_KEY="$(op read 'op://Development/Anthropic API Key/credential' 2>/dev/null)"
 export OBSIDIAN_TOKEN="$(op read 'op://Development/Obsidian REST Key/credential' 2>/dev/null)"
+
+# 1Password CLI shell plugins (aws, gh, etc.) — must load after oh-my-zsh
+# so the op-wrapped `aws` function takes precedence over oh-my-zsh's
+# bundled aws plugin.
+[[ -f ~/.config/op/plugins.sh ]] && source ~/.config/op/plugins.sh

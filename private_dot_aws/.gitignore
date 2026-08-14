@@ -1,0 +1,5 @@
+# Allowlist only — credentials must never live here. AWS auth goes
+# through the 1Password shell plugin instead of a static credentials file.
+*
+!.gitignore
+!private_config
