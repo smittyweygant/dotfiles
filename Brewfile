@@ -3,6 +3,8 @@ tap "common-fate/granted"
 tap "homebrew/services"
 # Extendable version manager with support for Ruby, Node.js, Erlang & more
 brew "asdf"
+# Syntax-highlighted `cat` replacement
+brew "bat"
 # Vector graphics library with cross-device output support
 brew "cairo"
 # Tools to bootstrap CAs, certificate requests, and signed certificates
@@ -11,12 +13,18 @@ brew "certstrap"
 brew "chezmoi"
 # GNU File, Shell, and Text utilities
 brew "coreutils"
+# Load/unload environment variables per-directory
+brew "direnv"
 # Isolated development environments using Docker
 brew "docker-compose", link: false
 # Create Docker hosts locally and on cloud providers
 brew "docker-machine", restart_service: :changed
 # .NET Core
 brew "dotnet"
+# Modern, icon- and git-aware `ls` replacement
+brew "eza"
+# Command-line fuzzy finder
+brew "fzf"
 # GitHub command-line tool
 brew "gh"
 # Mac App Store command-line interface

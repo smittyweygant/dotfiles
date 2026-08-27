@@ -1,0 +1,102 @@
+{{- if eq .chezmoi.os "darwin" }}
+plugins=(
+  zsh-nvm
+  git
+  aws
+  npm
+  zsh-autocomplete
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+{{- else }}
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-bat zsh-autocomplete aws python pip sudo rsync vscode snap npm nvm node docker ssh)
+{{- end }}
+
+# Personalized splash screen — once per new terminal window. Deliberately
+# placed above the instant-prompt block below: p10k's instant-prompt-to-real
+# transition clears/redraws the terminal, which silently wipes out anything
+# printed after it (verified — the code ran fine, its output just vanished).
+# Printing here, before that transition exists, avoids it entirely.
+[[ -f ~/.zsh_splash.zsh ]] && source ~/.zsh_splash.zsh
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Path to your oh-my-zsh installation.
+
+# Environment variables used by later init steps (EDITOR, PATH additions, etc.)
+[[ -f ~/.exports ]] && source ~/.exports
+
+# Profile ZSH
+# zmodload zsh/zprof
+
+export ZSH="$HOME/.oh-my-zsh"
+{{- if eq .chezmoi.os "darwin" }}
+export NVM_LAZY_LOAD=true
+export NVM_COMPLETION=true
+{{- end }}
+export ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Update oh-my-zsh silently in the background instead of blocking shell
+# startup on an interactive "Would you like to update? [Y/n]" prompt.
+zstyle ':omz:update' mode auto
+
+source "$ZSH/oh-my-zsh.sh"
+
+{{- if eq .chezmoi.os "darwin" }}
+
+# Enable pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"
+{{- end }}
+
+# Profile ZSH
+# zprof
+
+# Load Powerlevel10k
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+{{- if eq .chezmoi.os "darwin" }}
+export PATH="$HOME/.local/bin:$PATH"
+{{- end }}
+
+# Personal aliases and shell functions — loaded after oh-my-zsh so they
+# take precedence over any same-named aliases from plugins.
+[[ -f ~/.aliases ]] && source ~/.aliases
+[[ -f ~/.functions ]] && source ~/.functions
+
+# 1Password CLI shell plugins (aws, gh, etc.) — must load after oh-my-zsh
+# so the op-wrapped `aws` function takes precedence over oh-my-zsh's
+# bundled aws plugin.
+[[ -f ~/.config/op/plugins.sh ]] && source ~/.config/op/plugins.sh
+
+# Per-project secrets (e.g. ANTHROPIC_API_KEY) load lazily via direnv's
+# .envrc in the projects that need them, instead of eagerly for every
+# shell — avoids a biometric prompt on every new tab/pane.
+eval "$(direnv hook zsh)"
+
+# fzf fuzzy-finder key bindings (Ctrl+R history, Ctrl+T files) and completion.
+# Path differs by install method (Homebrew on macOS vs apt on Debian/Ubuntu).
+for _fzf_file in \
+  "$(brew --prefix 2>/dev/null)/opt/fzf/shell/key-bindings.zsh" \
+  "$(brew --prefix 2>/dev/null)/opt/fzf/shell/completion.zsh" \
+  /usr/share/doc/fzf/examples/key-bindings.zsh \
+  /usr/share/doc/fzf/examples/completion.zsh; do
+  [[ -f "$_fzf_file" ]] && source "$_fzf_file"
+done
+unset _fzf_file
+
+# Reset iTerm2's key-encoding state after every ssh session. A remote app
+# (e.g. Neovim) can push the terminal into the Kitty keyboard protocol and
+# never get to pop it back out if the connection drops uncleanly (laptop
+# sleep, network blip) — leaving keystrokes typed afterward printed as raw
+# escape sequences like `[9;5u` instead of being interpreted.
+ssh() {
+  command ssh "$@"
+  printf '\e[=0u'
+}

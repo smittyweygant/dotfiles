@@ -169,3 +169,32 @@ function o() {
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+# Bump the terminal font size and declutter the p10k prompt (drops the
+# user@host segment) for screen-sharing/demos. `undemo` reverses both.
+# The font-size step requires iTerm2 to be the frontmost app, with
+# Accessibility access granted to it for System Events (one-time macOS
+# prompt the first time this runs).
+function demo() {
+	if [ -n "$ITERM_SESSION_ID" ]; then
+		for _ in 1 2 3 4; do
+			osascript -e 'tell application "System Events" to keystroke "+" using {command down}' 2>/dev/null;
+		done;
+	fi;
+	export DEMO_MODE=1;
+	typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs command_execution_time newline virtualenv prompt_char);
+	(( ${+functions[p10k]} )) && p10k reload;
+	clear;
+}
+
+function undemo() {
+	if [ -n "$ITERM_SESSION_ID" ]; then
+		for _ in 1 2 3 4; do
+			osascript -e 'tell application "System Events" to keystroke "-" using {command down}' 2>/dev/null;
+		done;
+	fi;
+	unset DEMO_MODE;
+	[ -f ~/.p10k.zsh ] && source ~/.p10k.zsh;
+	(( ${+functions[p10k]} )) && p10k reload;
+	clear;
+}
