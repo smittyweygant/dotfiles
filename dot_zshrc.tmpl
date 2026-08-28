@@ -12,6 +12,11 @@ plugins=(
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-bat zsh-autocomplete aws python pip sudo rsync vscode snap npm nvm node docker ssh)
 {{- end }}
 
+# zsh-autocomplete's recent-dirs feature writes to this path on every `cd`
+# but never creates it itself, so a fresh machine throws
+# "chpwd_recent_filehandler: no such file or directory" on the first cd.
+mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/zsh"
+
 # Personalized splash screen — once per new terminal window. Deliberately
 # placed above the instant-prompt block below: p10k's instant-prompt-to-real
 # transition clears/redraws the terminal, which silently wipes out anything
