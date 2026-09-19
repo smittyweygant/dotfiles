@@ -5,27 +5,48 @@ Personal macOS toolchain and configuration, managed with [chezmoi](https://www.c
 ## What's here
 
 - Shell config (zsh + oh-my-zsh + Powerlevel10k), editor config (vim), git config, and assorted CLI tool dotfiles — all managed as `dot_*` files that chezmoi renders into `$HOME`.
-- `dot_ssh/config` + `dot_config/1Password/ssh/agent.toml` — SSH client config and 1Password SSH agent scoping. No private keys are ever tracked here; see [SSH keys](#ssh-keys) below.
+- `private_dot_ssh/config` + `dot_config/private_1Password/ssh/agent.toml` — SSH client config and 1Password SSH agent scoping. No private keys are ever tracked here; see [SSH keys](#ssh-keys) below.
 - `run_once_before_10-macos-defaults.sh` — macOS system preference tweaks (`defaults write` commands), runs once on a fresh machine.
 - `run_once_before_05-create-vim-dirs.sh` — creates vim's backup/swap/undo directories.
+- `run_once_after_20-install-zsh-framework.sh` — clones oh-my-zsh, Powerlevel10k, and the custom zsh plugins `.zshrc` expects.
+- `run_once_after_30-import-app-settings.sh.tmpl` — iTerm2 color preset and other tweaks that need the apps installed first.
 - `Brewfile` + `run_onchange_install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
 - `MASfile` + `run_onchange_install-mas-apps.sh.tmpl` — Mac App Store apps via [`mas`](https://github.com/mas-cli/mas).
 - `APPLICATIONS.md` — apps installed outside Homebrew/the App Store (direct download, MDM) that can't be scripted; a manual-reinstall checklist.
-- `init/` — app-specific settings (Sublime Text, iTerm2/Terminal color profiles, Spectacle) that need manual import; not chezmoi-managed.
+- `init/` — app-specific settings (iTerm2/Terminal color profiles, Spectacle) that need manual import; not chezmoi-managed.
 
 Secrets (SSH keys, AWS credentials, API tokens) are **not** stored here — see [Secrets](#secrets) below.
 
 ## New machine setup
 
-1. Install [1Password](https://1password.com/) and the 1Password CLI, sign in, and enable the SSH agent + CLI integration (Settings → Developer). This is the one manual gate — everything else here depends on `op` being signed in.
-2. Install Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-3. Install chezmoi and apply this repo:
+Prerequisites: signed in to iCloud (Apple ID) and to the **App Store app** (the MAS step below can't sign in for you).
+
+1. **Install Homebrew** (it also installs the Xcode Command Line Tools, and asks for your password):
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+   On Apple Silicon Homebrew lives in `/opt/homebrew`, which isn't on `PATH` yet in the current shell — the installer prints a `brew shellenv` line to run; typically:
+   ```bash
+   eval "$(/opt/homebrew/bin/brew shellenv)"
+   ```
+   (The chezmoi-managed `.zshrc` does this automatically once applied.)
+2. **Install 1Password and its CLI, sign in, and enable the SSH agent + CLI integration** (Settings → Developer). This is the one manual gate — everything else depends on `op` being signed in.
+   ```bash
+   brew install --cask 1password 1password-cli
+   ```
+3. **Install chezmoi and apply this repo.** Clone over **HTTPS**, not SSH: the repo is public, and `~/.ssh/config` (which points ssh at the 1Password agent) doesn't exist until this step finishes, so an SSH clone would fail.
    ```bash
    brew install chezmoi
-   chezmoi init --apply git@github.com:smittyweygant/dotfiles.git
+   chezmoi init --apply https://github.com/smittyweygant/dotfiles.git
    ```
-   This clones the repo, runs the `run_once_` setup scripts (macOS defaults, vim dirs), renders all `dot_*` files into `$HOME`, and runs the `run_onchange_` scripts (Homebrew bundle, MAS apps).
-4. Work through `APPLICATIONS.md` for anything that can't be scripted.
+   This clones the repo, runs the `run_once_before_` scripts (macOS defaults — prompts for sudo — and vim dirs), renders all `dot_*` files into `$HOME`, then runs the `run_onchange_` Homebrew bundle and MAS installs and the `run_once_after_` scripts (zsh framework, app settings). The Homebrew bundle is long and some casks (Docker Desktop, Zoom, Microsoft Office) prompt for your password partway through.
+   Afterwards, optionally switch the clone to SSH so you can push: `git -C ~/.local/share/chezmoi remote set-url origin git@github.com:smittyweygant/dotfiles.git`
+4. **Per-machine files chezmoi deliberately doesn't create** (open a fresh terminal first):
+   - `~/.gitconfig.local` — this machine's git identity, e.g. `[user]` / `name = …` / `email = …`. The tracked `~/.gitconfig` includes it last so it overrides the default.
+   - `~/.ssh/config.local` — personal hosts; see [SSH keys](#ssh-keys).
+   - `op plugin init aws` — see [AWS credentials](#aws-credentials).
+5. **Finish by hand**: pick the Solarized Dark preset and Hack Nerd Font in iTerm2, sign in to the installed apps, and log out/in so the macOS defaults fully apply. Work through `APPLICATIONS.md` for anything not scripted (and its "Undecided" list).
+6. **Verify**: `brew bundle check --file=$(chezmoi source-path)/Brewfile`, `chezmoi diff` (should be empty), and `ssh -T git@github.com`.
 
 ## Day-to-day usage
 
@@ -52,12 +73,12 @@ then review the diff before committing.
 
 All private keys live in the **Development** vault in 1Password — none are stored in `~/.ssh` or this repo. The 1Password SSH agent serves them transparently:
 
-- `dot_ssh/config` sets `IdentityAgent` to 1Password's socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`) under the catch-all `Host *` block, and includes `github.com` directly (nothing sensitive there). Per-host `IdentityFile` lines point at `.pub` files only — these just pin *which* key to offer for a given host; the agent supplies the actual private material.
-- `dot_config/1Password/ssh/agent.toml` scopes the agent to the Development vault (`vault = "Development"`). Creating a custom `agent.toml` overrides 1Password's default vault behavior, so every key that should be available over SSH needs to live in that vault — dropping a new key into a different vault silently won't show up in `ssh-add -l` until moved.
-- `dot_ssh/.gitignore` is a repo-only allowlist (`config` and `*.pub` only) so this directory can never accidentally pick up a real private key, even if something is copied in carelessly later. It's not deployed to `$HOME` itself — chezmoi skips literal dotfiles in the source tree.
-- **Personal infra (home LAN IPs, EC2 hostnames, Tailscale FQDN) lives in `~/.ssh/config.local`, gitignored and never part of this public repo at all** — not obfuscated/templated, just not tracked. `dot_ssh/config` pulls it in via `Include config.local` as the very **first** line in the file — OpenSSH (tested on 10.2p1/LibreSSL) silently ignores an `Include` that comes after any `Host` block, so don't reorder this.
+- `private_dot_ssh/config` sets `IdentityAgent` to 1Password's socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`) under the catch-all `Host *` block, and includes `github.com` directly (nothing sensitive there). Per-host `IdentityFile` lines point at `.pub` files only — these just pin *which* key to offer for a given host; the agent supplies the actual private material.
+- `dot_config/private_1Password/ssh/agent.toml` scopes the agent to the Development vault (`vault = "Development"`). Creating a custom `agent.toml` overrides 1Password's default vault behavior, so every key that should be available over SSH needs to live in that vault — dropping a new key into a different vault silently won't show up in `ssh-add -l` until moved.
+- `private_dot_ssh/.gitignore` is a repo-only allowlist (`config` and `*.pub` only) so this directory can never accidentally pick up a real private key, even if something is copied in carelessly later. It's not deployed to `$HOME` itself — chezmoi skips literal dotfiles in the source tree.
+- **Personal infra (home LAN IPs, EC2 hostnames, Tailscale FQDN) lives in `~/.ssh/config.local`, gitignored and never part of this public repo at all** — not obfuscated/templated, just not tracked. `private_dot_ssh/config` pulls it in via `Include config.local` as the very **first** line in the file — OpenSSH (tested on 10.2p1/LibreSSL) silently ignores an `Include` that comes after any `Host` block, so don't reorder this.
 
-**New machine**: after signing into the 1Password app (step 1 above) and running `chezmoi apply`, `dot_ssh/config` and `agent.toml` land automatically, but `~/.ssh/config.local` does not — it's deliberately never in this repo (not even in git history), so recreate it by hand from memory/your own separate notes before those personal hosts will resolve. The one other manual step chezmoi can't do: open each SSH Key item in 1Password (or drag the key file onto the 1Password window if a key isn't in the vault yet) so it's available to drag/import — the keys themselves live in your 1Password account and sync there, not through this repo.
+**New machine**: after signing into the 1Password app (step 2 above) and running `chezmoi apply`, `private_dot_ssh/config` and `agent.toml` land automatically, but `~/.ssh/config.local` does not — it's deliberately never in this repo (not even in git history), so recreate it by hand from memory/your own separate notes before those personal hosts will resolve. The one other manual step chezmoi can't do: open each SSH Key item in 1Password (or drag the key file onto the 1Password window if a key isn't in the vault yet) so it's available to drag/import — the keys themselves live in your 1Password account and sync there, not through this repo.
 
 ### AWS credentials
 

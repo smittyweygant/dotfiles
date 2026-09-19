@@ -5,3 +5,7 @@
 	lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 [init]
 	defaultBranch = main
+# Per-machine overrides (e.g. a work [user] name/email). Untracked; git silently
+# ignores the include if the file doesn't exist. Keep this last so it wins.
+[include]
+	path = ~/.gitconfig.local

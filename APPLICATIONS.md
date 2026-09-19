@@ -1,63 +1,35 @@
-# Manually-installed applications
+# Applications not covered by the Brewfile / MASfile
 
-Apps installed outside Homebrew and outside the Mac App Store — direct download, vendor installer, or MDM. These can't be reliably scripted (license gates, custom installers), so this is a checklist to work through by hand on a new machine, not automation.
+Homebrew casks are tracked in `Brewfile`; Mac App Store apps in `MASfile`. This file records everything else: what needs a manual install, what was deliberately left behind when moving to the work MacBook (2026-09), and what's still undecided.
 
-(Homebrew casks are tracked in `Brewfile`; Mac App Store apps are tracked in `MASfile` — neither needs to be repeated here.)
+## Manual installs (not scriptable)
 
-## Adobe
-- Adobe Creative Cloud (installs the rest below)
-- Acrobat DC
-- Lightroom CC
-- Lightroom Classic
-- Photoshop 2025
+- **Microsoft Defender / Okta Verify** — deployed by IT/MDM, not installed by hand. Check Self Service / ask IT.
 
-## Microsoft 365
-- Excel, Word, PowerPoint, Outlook, OneNote, Teams
-- OneDrive
-- Microsoft Defender
+## Deliberately left behind on the old MacBook
 
-## AI / dev tools
-- ChatGPT
-- Claude (desktop app)
-- Cursor
-- HackerRank (interview tooling)
+Not carried over to the work Mac. Still in git history (`Brewfile`, `MASfile`, earlier versions of this file) if you ever want them back.
 
-## Browsers
-- Google Chrome
-- Tor Browser
+- **Salesforce / Apex tooling**: all `salesforce.*` VS Code extensions, `financialforce.lana`
+- **Hugo / Temporal / protobuf**: formulae and the Hugo VS Code extensions
+- **Virtualization**: VirtualBox, `docker-machine` (poor fit on Apple Silicon; Docker Desktop covers containers)
+- **Tailscale formula**: replaced by the `tailscale-app` cask, which bundles the CLI — running both conflicts
+- **Personal comms/media**: Signal, Monal, Spotify, VLC, Plex, qBittorrent, Transmission, 2FHey (1Password and macOS's Passwords app both generate 2FA codes natively)
+- **Adobe**: Creative Cloud, Acrobat DC, Lightroom CC/Classic, Photoshop
+- **Hobby hardware**: Arduino IDE, Android Studio, VictronConnect, Raspberry Pi Imager, Elgato Camera Hub, DisplayLink Manager, Epson/Nikon software
+- **Networking**: NordVPN, VIP Access, Tor Browser
+- **Misc**: Beyond Compare, HackerRank, VSee, `.arduinoIDE`
+- **Dev/utility casks dropped in the final pass**: KeyCastr, ngrok, Sequel Ace, Sublime Text (and its `init/Preferences.sublime-settings`), Raycast
 
-## Communication / media
-- Slack
-- Spotify
-- Zoom (zoom.us)
-- 2FHey
-- VSee
+## Added after review
 
-## Hardware / peripherals
-- DisplayLink Manager
-- Elgato Camera Hub
-- Epson Software
-- Nikon Software
-- Arduino IDE (if the hobby project is still active — flagged as unsure in the original survey)
+Claude desktop, Claude Code, ChatGPT, Codex, and OneDrive are now casks in the `Brewfile`. Claude Code via the cask is Homebrew-managed (update with `brew upgrade`), unlike the auto-updating native installer used on the old Mac. `~/projects` is a symlink into `~/OneDrive/Projects` on the old Mac — sort that out separately; nothing here creates it.
 
-## Networking / remote access
-- NordVPN
-- Tailscale.app (the CLI is in `Brewfile`; the menu-bar app itself is a separate direct-download install)
-- VIP Access (Symantec 2FA token)
+## Still undecided
 
-## Torrenting / media servers
-- Plex
-- qBittorrent
-- Transmission
-- OBS
+- VS Code Insiders (`visual-studio-code@insiders`) — still used, or drop in favor of stable? Not in the `Brewfile`.
+- Kept by design: Amphetamine and 1Password for Safari (both in `MASfile`).
 
-## Misc
-- 1Password (desktop app — the CLI is in `Brewfile` as `1password-cli`)
-- Beyond Compare
-- Dropbox
-- GIMP
-- Raspberry Pi Imager
+## Open follow-ups from the original survey
 
----
-
-**Follow-up items from the original survey, not yet decided** (don't reinstall/reconfigure blindly, revisit first): `.asdf` vs `.nvm`/`.pyenv` overlap, `.vscode-insiders` (still used, or drop in favor of stable VS Code?), `.sf` (Salesforce CLI — active project?), `.odbc.ini`/`.odbcinst.ini`, `.config/temporalio`/`.config/tcld` (still using Temporal?).
+Don't reinstall/reconfigure blindly, revisit first: `.asdf` vs `.nvm`/`.pyenv` overlap, `.sf` (Salesforce CLI — moot if Salesforce is dropped), `.odbc.ini`/`.odbcinst.ini`, `.config/temporalio`/`.config/tcld` (moot if Temporal is dropped), the stale `withfig.fig` VS Code extension (Fig was sunset).

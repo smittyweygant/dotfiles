@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# App-specific settings from init/ that can only be applied once the apps
+# exist. These used to live in run_once_before_10-macos-defaults, where they
+# silently no-op'd on a fresh machine (Homebrew hadn't installed the apps yet)
+# and, being run_once, never got retried. Each step skips if its app is missing.
+SOURCE_DIR="{{ .chezmoi.sourceDir }}"
+
+# iTerm2: add the Solarized Dark color preset (select it in Settings → Profiles → Colors).
+if [ -d "/Applications/iTerm.app" ]; then
+  open "$SOURCE_DIR/init/Solarized Dark.itermcolors"
+fi
+
+# Dropbox: remove the green "up to date" checkmark emblem in Finder.
+file="/Applications/Dropbox.app/Contents/Resources/emblem-dropbox-uptodate.icns"
+[ -e "$file" ] && mv -f "$file" "$file.bak"
+
+exit 0

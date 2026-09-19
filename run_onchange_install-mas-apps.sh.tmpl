@@ -8,13 +8,12 @@ if ! command -v mas >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! mas account >/dev/null 2>&1; then
-  echo "Not signed in to the Mac App Store — sign in via the App Store app first, then re-run: chezmoi apply"
-  exit 0
-fi
-
+# Note: mas >= 6 dropped `mas account`, so there's no CLI sign-in check.
+# You must already be signed in to the App Store app; if not, each install
+# below fails and is reported. This script only re-runs when MASfile changes,
+# so after signing in, install the failures by hand with `mas install <id>`.
 while read -r id name; do
   [ -z "$id" ] && continue
   case "$id" in \#*) continue ;; esac
-  mas install "$id" || echo "Failed to install $name ($id) — may already be installed under a different Apple ID"
+  mas install "$id" || echo "Failed to install $name ($id) — not signed in to the App Store, or not available under this Apple ID"
 done < "{{ .chezmoi.sourceDir }}/MASfile"

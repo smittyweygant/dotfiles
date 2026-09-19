@@ -17,12 +17,12 @@ brew "coreutils"
 brew "direnv"
 # Isolated development environments using Docker
 brew "docker-compose", link: false
-# Create Docker hosts locally and on cloud providers
-brew "docker-machine", restart_service: :changed
 # .NET Core
 brew "dotnet"
 # Modern, icon- and git-aware `ls` replacement
 brew "eza"
+# Play, record, convert, and stream audio and video
+brew "ffmpeg"
 # Command-line fuzzy finder
 brew "fzf"
 # GitHub command-line tool
@@ -47,8 +47,6 @@ brew "go"
 brew "harfbuzz"
 # Open-source build automation tool based on the Groovy and Kotlin DSL
 brew "gradle"
-# Configurable static site generator
-brew "hugo"
 # Java-based project management
 brew "maven"
 # Open-source, cross-platform JavaScript runtime environment
@@ -61,18 +59,12 @@ brew "openjdk@17"
 brew "pinentry-mac"
 # Fast, disk space efficient package manager
 brew "pnpm"
-# Protocol buffers (Google's data interchange format)
-brew "protobuf"
 # Python version management
 brew "pyenv"
 # Sparklines for the shell
 brew "spark"
-# Easiest, most secure way to use WireGuard and 2FA
-brew "tailscale"
 # User interface to the TELNET protocol
 brew "telnet"
-# Command-line interface for running and interacting with Temporal Server and UI
-brew "temporal"
 # Internet file retriever
 brew "wget"
 # JavaScript package manager
@@ -92,37 +84,47 @@ cask "docker-desktop"
 cask "font-hack-nerd-font"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
-# Open-source keystroke visualiser
-cask "keycastr"
-# Reverse proxy, secure introspectable tunnels to localhost
-cask "ngrok"
 # Knowledge base that works on top of a local folder of plain text Markdown files
 cask "obsidian"
-# Control your tools with a few keystrokes
-cask "raycast"
-# MySQL/MariaDB database management
-cask "sequel-ace"
-# Instant messaging application focusing on security
-cask "signal"
-# Text editor for code, markup and prose
-cask "sublime-text"
 # JDK from the Eclipse Foundation (Adoptium)
 cask "temurin"
-# Virtualiser for x86 hardware
-cask "virtualbox"
 # Open-source code editor
 cask "visual-studio-code"
-# Multimedia player
-cask "vlc"
+# Password manager desktop app (sign in first — everything else depends on it)
+cask "1password"
+# Cloud storage and file sync
+cask "dropbox"
+# Free VPN/DNS client
+cask "cloudflare-warp"
+# Image editor
+cask "gimp"
+# Notes and workspace
+cask "notion"
+# Live streaming and screen recording
+cask "obs"
+# Menu-bar scripting host
+cask "swiftbar"
+# Mesh VPN (app bundles the CLI; don't also install the `tailscale` formula)
+cask "tailscale-app"
+# AI assistants: Claude desktop, Claude Code CLI, ChatGPT desktop, OpenAI Codex CLI
+cask "chatgpt"
+cask "claude"
+cask "claude-code"
+cask "codex"
+# Personal OneDrive sync (note: ~/projects symlinks into ~/OneDrive/Projects)
+cask "onedrive"
+# Work: browser, chat, video calls, Microsoft 365 suite
+cask "google-chrome"
+cask "microsoft-office"
+cask "microsoft-teams"
+cask "slack"
+cask "zoom"
 vscode "anthropic.claude-code"
-vscode "budparr.language-hugo-vscode"
 vscode "dbaeumer.vscode-eslint"
 vscode "docker.docker"
 vscode "eamodio.gitlens"
 vscode "esbenp.prettier-vscode"
-vscode "financialforce.lana"
 vscode "golang.go"
-vscode "kaellarkin.hugo-shortcode-syntax"
 vscode "mechatroner.rainbow-csv"
 vscode "ms-azuretools.vscode-containers"
 vscode "ms-azuretools.vscode-docker"
@@ -146,29 +148,6 @@ vscode "redhat.fabric8-analytics"
 vscode "redhat.java"
 vscode "redhat.vscode-xml"
 vscode "redhat.vscode-yaml"
-vscode "rusnasonov.vscode-hugo"
-vscode "salesforce.agent-script-language-client"
-vscode "salesforce.agentforce-vibes-autocomplete"
-vscode "salesforce.salesforce-vscode-slds"
-vscode "salesforce.salesforcedx-einstein-gpt"
-vscode "salesforce.salesforcedx-vscode"
-vscode "salesforce.salesforcedx-vscode-agents"
-vscode "salesforce.salesforcedx-vscode-apex"
-vscode "salesforce.salesforcedx-vscode-apex-debugger"
-vscode "salesforce.salesforcedx-vscode-apex-log"
-vscode "salesforce.salesforcedx-vscode-apex-oas"
-vscode "salesforce.salesforcedx-vscode-apex-replay-debugger"
-vscode "salesforce.salesforcedx-vscode-apex-testing"
-vscode "salesforce.salesforcedx-vscode-core"
-vscode "salesforce.salesforcedx-vscode-lightning"
-vscode "salesforce.salesforcedx-vscode-lwc"
-vscode "salesforce.salesforcedx-vscode-metadata"
-vscode "salesforce.salesforcedx-vscode-org"
-vscode "salesforce.salesforcedx-vscode-org-browser"
-vscode "salesforce.salesforcedx-vscode-services"
-vscode "salesforce.salesforcedx-vscode-soql"
-vscode "salesforce.salesforcedx-vscode-visualforce"
-vscode "salesforce.sfdx-code-analyzer-vscode"
 vscode "svelte.svelte-vscode"
 vscode "tomoki1207.pdf"
 vscode "vscjava.vscode-gradle"
