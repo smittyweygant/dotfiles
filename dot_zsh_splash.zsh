@@ -16,7 +16,7 @@ _zsh_splash() {
   printf '%s\n' '  \__ \/ /|_/ // /  / /   / /    \  / '
   printf '%s\n' ' ___/ / /  / // /  / /   / /     / /  '
   printf '%s\n' '/____/_/  /_/___/ /_/   /_/     /_/   '
-  printf '%s' "${reset}${dim}${magenta}"
+  printf '%s' "${reset}${dim}${cyan}"
   printf '%s\n' '            Human in the Loop'
   printf '%s' "${reset}"
   print
