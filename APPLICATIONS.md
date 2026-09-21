@@ -6,6 +6,14 @@ Homebrew casks are tracked in `Brewfile`; Mac App Store apps in `MASfile`. This 
 
 - **Microsoft Defender / Okta Verify** — deployed by IT/MDM, not installed by hand. Check Self Service / ask IT.
 
+## First-run: enable "Open at Login"
+
+macOS 13+ manages this via SMAppService (per-app registration), so it can't be reliably scripted from dotfiles. On the new Mac, enable each of these in System Settings → General → Login Items → Open at Login, or accept the prompt each app shows on first launch:
+
+- **Amphetamine** (MAS)
+- **SwiftBar** (Homebrew cask) — menu-bar-only, so basically required
+- **Cloudflare WARP** (Homebrew cask)
+
 ## Deliberately left behind on the old MacBook
 
 Not carried over to the work Mac. Still in git history (`Brewfile`, `MASfile`, earlier versions of this file) if you ever want them back.
