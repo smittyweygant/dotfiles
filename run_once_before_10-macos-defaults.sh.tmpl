@@ -77,7 +77,9 @@ defaults write NSGlobalDomain AppleShowScrollBars -string Always
 # (not currently set — skipped) defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+# (The `-kill` option was removed from lsregister and now errors visibly.
+# The rebuild is unnecessary on a fresh machine anyway — skipped.)
+# (not currently set — skipped) /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
 
 # Display ASCII control characters using caret notation in standard text views
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -355,7 +357,10 @@ defaults write com.apple.finder FXPreferredViewStyle -string clmv
 # (not currently set — skipped) defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
 
 # Show the ~/Library folder
-chflags nohidden ~/Library && xattr -d com.apple.FinderInfo ~/Library
+# (The xattr -d part errors "No such xattr" on a fresh Mac where the
+# attribute was never set; swallow it, chflags is the part that matters.)
+chflags nohidden ~/Library
+xattr -d com.apple.FinderInfo ~/Library 2>/dev/null || true
 
 # Show the /Volumes folder
 sudo chflags nohidden /Volumes
@@ -438,7 +443,9 @@ defaults write com.apple.dock show-recents -bool false
 #defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 
 # Reset Launchpad, but keep the desktop wallpaper intact
-find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete
+# (The Dock support dir doesn't exist until the Dock has run at least once,
+# so skip cleanly on a fresh Mac.)
+[ -d "${HOME}/Library/Application Support/Dock" ] && find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete
 
 # Add iOS & Watch Simulator to Launchpad
 # (Xcode isn't installed on the source machine — these would just create
@@ -490,7 +497,10 @@ find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -dele
 # (not currently set — skipped) defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
 
 # Set Safari’s home page to `about:blank` for faster loading
-defaults write com.apple.Safari HomePage -string "https://www.apple.com/startpage/"
+# (Safari is sandboxed on modern macOS — its prefs live under
+# ~/Library/Containers/com.apple.Safari and writes fail without Full Disk
+# Access. Set from Safari's own preferences instead.)
+# (not currently set — skipped) defaults write com.apple.Safari HomePage -string "https://www.apple.com/startpage/"
 
 # Prevent Safari from opening ‘safe’ files automatically after downloading
 # (not currently set — skipped) defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
@@ -502,7 +512,8 @@ defaults write com.apple.Safari HomePage -string "https://www.apple.com/startpag
 # (not currently set — skipped) defaults write com.apple.Safari ShowFavoritesBar -bool false
 
 # Hide Safari’s sidebar in Top Sites
-defaults write com.apple.Safari ShowSidebarInTopSites -bool false
+# (Safari sandbox — see HomePage note above.)
+# (not currently set — skipped) defaults write com.apple.Safari ShowSidebarInTopSites -bool false
 
 # Disable Safari’s thumbnail cache for History and Top Sites
 # (not currently set — skipped) defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2
@@ -579,17 +590,18 @@ defaults write com.apple.Safari ShowSidebarInTopSites -bool false
 
 # Display emails in threaded mode, sorted by date (oldest at the top)
 # TODO(review): complex type, kept mathiasbynens' original value below — verify against your actual setting
-defaults write com.apple.mail DraftsViewerAttributes -dict-add "DisplayInThreadedMode" -string "yes"
+# (Mail is also sandboxed on modern macOS — skipped; not used on the work Mac anyway.)
+# (not currently set — skipped) defaults write com.apple.mail DraftsViewerAttributes -dict-add "DisplayInThreadedMode" -string "yes"
 # TODO(review): complex type, kept mathiasbynens' original value below — verify against your actual setting
-defaults write com.apple.mail DraftsViewerAttributes -dict-add "SortedDescending" -string "yes"
+# (not currently set — skipped) defaults write com.apple.mail DraftsViewerAttributes -dict-add "SortedDescending" -string "yes"
 # TODO(review): complex type, kept mathiasbynens' original value below — verify against your actual setting
-defaults write com.apple.mail DraftsViewerAttributes -dict-add "SortOrder" -string "received-date"
+# (not currently set — skipped) defaults write com.apple.mail DraftsViewerAttributes -dict-add "SortOrder" -string "received-date"
 
 # Disable inline attachments (just show the icons)
 # (not currently set — skipped) defaults write com.apple.mail DisableInlineAttachmentViewing -bool true
 
 # Disable automatic spell checking
-defaults write com.apple.mail SpellCheckingBehavior -string InlineSpellCheckingEnabled
+# (not currently set — skipped) defaults write com.apple.mail SpellCheckingBehavior -string InlineSpellCheckingEnabled
 
 ###############################################################################
 # Spotlight                                                                   #
@@ -609,29 +621,32 @@ defaults write com.apple.mail SpellCheckingBehavior -string InlineSpellCheckingE
 # 	MENU_SPOTLIGHT_SUGGESTIONS (send search queries to Apple)
 # 	MENU_WEBSEARCH             (send search queries to Apple)
 # 	MENU_OTHER
-# (not currently set — skipped) defaults write com.apple.spotlight orderedItems -array \
-	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
-	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
-	'{"enabled" = 1;"name" = "DIRECTORIES";}' \
-	'{"enabled" = 1;"name" = "PDF";}' \
-	'{"enabled" = 1;"name" = "FONTS";}' \
-	'{"enabled" = 0;"name" = "DOCUMENTS";}' \
-	'{"enabled" = 0;"name" = "MESSAGES";}' \
-	'{"enabled" = 0;"name" = "CONTACT";}' \
-	'{"enabled" = 0;"name" = "EVENT_TODO";}' \
-	'{"enabled" = 0;"name" = "IMAGES";}' \
-	'{"enabled" = 0;"name" = "BOOKMARKS";}' \
-	'{"enabled" = 0;"name" = "MUSIC";}' \
-	'{"enabled" = 0;"name" = "MOVIES";}' \
-	'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
-	'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
-	'{"enabled" = 0;"name" = "SOURCE";}' \
-	'{"enabled" = 0;"name" = "MENU_DEFINITION";}' \
-	'{"enabled" = 0;"name" = "MENU_OTHER";}' \
-	'{"enabled" = 0;"name" = "MENU_CONVERSION";}' \
-	'{"enabled" = 0;"name" = "MENU_EXPRESSION";}' \
-	'{"enabled" = 0;"name" = "MENU_WEBSEARCH";}' \
-	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
+# (not currently set — the whole array below was skipped, but only the
+# leading `defaults write` was commented; the continuation lines still
+# executed as separate commands and errored with "command not found")
+# defaults write com.apple.spotlight orderedItems -array \
+#	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
+#	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
+#	'{"enabled" = 1;"name" = "DIRECTORIES";}' \
+#	'{"enabled" = 1;"name" = "PDF";}' \
+#	'{"enabled" = 1;"name" = "FONTS";}' \
+#	'{"enabled" = 0;"name" = "DOCUMENTS";}' \
+#	'{"enabled" = 0;"name" = "MESSAGES";}' \
+#	'{"enabled" = 0;"name" = "CONTACT";}' \
+#	'{"enabled" = 0;"name" = "EVENT_TODO";}' \
+#	'{"enabled" = 0;"name" = "IMAGES";}' \
+#	'{"enabled" = 0;"name" = "BOOKMARKS";}' \
+#	'{"enabled" = 0;"name" = "MUSIC";}' \
+#	'{"enabled" = 0;"name" = "MOVIES";}' \
+#	'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
+#	'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
+#	'{"enabled" = 0;"name" = "SOURCE";}' \
+#	'{"enabled" = 0;"name" = "MENU_DEFINITION";}' \
+#	'{"enabled" = 0;"name" = "MENU_OTHER";}' \
+#	'{"enabled" = 0;"name" = "MENU_CONVERSION";}' \
+#	'{"enabled" = 0;"name" = "MENU_EXPRESSION";}' \
+#	'{"enabled" = 0;"name" = "MENU_WEBSEARCH";}' \
+#	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
 # Load new settings before rebuilding the index
 killall mds > /dev/null 2>&1
 # Make sure indexing is enabled for the main volume
