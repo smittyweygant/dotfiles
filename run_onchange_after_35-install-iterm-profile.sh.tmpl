@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# iTerm2 Dynamic Profile: iTerm auto-loads any JSON in
+# ~/Library/Application Support/iTerm2/DynamicProfiles/ at launch, so
+# tracking a full profile export there gives cross-machine parity for
+# font, keybindings, cursor, window behavior, etc. (colors are still
+# handled separately via run_once_after_30's .itermcolors import).
+#
+# Export flow: iTerm2 → Settings → Profiles → <your profile> → Other
+# Actions → Save Profile as JSON → save to init/iterm-profile.json in
+# this repo. Commit + push. Next `chezmoi apply` installs it here.
+#
+# This is a run_onchange script — re-runs whenever the profile JSON's
+# hash below changes.
+{{- $profile := joinPath .chezmoi.sourceDir "init/iterm-profile.json" -}}
+{{- if stat $profile }}
+# iTerm profile hash: {{ include "init/iterm-profile.json" | sha256sum }}
+set -euo pipefail
+DEST_DIR="$HOME/Library/Application Support/iTerm2/DynamicProfiles"
+mkdir -p "$DEST_DIR"
+cp -f "{{ $profile }}" "$DEST_DIR/smitty.json"
+echo "Installed iTerm dynamic profile → $DEST_DIR/smitty.json"
+{{- else }}
+# No init/iterm-profile.json yet — see the export flow above.
+echo "No iTerm dynamic profile to install (init/iterm-profile.json missing)"
+{{- end }}

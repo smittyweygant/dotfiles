@@ -11,10 +11,11 @@ Personal macOS toolchain and configuration, managed with [chezmoi](https://www.c
 - `run_once_after_20-install-zsh-framework.sh` — clones oh-my-zsh, Powerlevel10k, and the custom zsh plugins `.zshrc` expects.
 - `run_once_after_25-install-awscli.sh` — installs AWS CLI v2 via [AWS's official install script](https://awscli.amazonaws.com/v2/install.sh), not Homebrew (its community `awscli` formula lags behind official releases).
 - `run_once_after_30-import-app-settings.sh.tmpl` — iTerm2 color preset and other tweaks that need the apps installed first.
+- `run_onchange_after_35-install-iterm-profile.sh.tmpl` — installs `init/iterm-profile.json` as an iTerm2 Dynamic Profile (font, keybindings, cursor, window behavior — everything the `.itermcolors` preset alone doesn't cover). Re-runs when the profile JSON changes. See [iTerm2 profile](#iterm2-profile) for the export flow.
 - `Brewfile` + `run_onchange_10-install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
 - `MASfile` + `run_onchange_20-install-mas-apps.sh.tmpl` — Mac App Store apps via [`mas`](https://github.com/mas-cli/mas).
 - `APPLICATIONS.md` — apps installed outside Homebrew/the App Store (direct download, MDM) that can't be scripted; a manual-reinstall checklist.
-- `init/` — app-specific settings (iTerm2/Terminal color profiles, Spectacle) that need manual import; not chezmoi-managed.
+- `init/` — app-specific settings that get consumed by the scripts above: `Solarized Dark.itermcolors` (iTerm color preset), `Solarized Dark xterm-256color.terminal` (Terminal.app color preset — currently unused), `spectacle.json` (Spectacle keybindings — Spectacle itself is retired), and — when populated — `iterm-profile.json` (full iTerm Dynamic Profile export).
 
 Secrets (SSH keys, AWS credentials, API tokens) are **not** stored here — see [Secrets](#secrets) below.
 
@@ -100,6 +101,22 @@ The `smittoid` IAM user's access key lives in a 1Password "AWS Access Key" item 
 Then run `op plugin init aws` once, choose "Import" and paste in the access key, save it to the Development vault. A fresh terminal will then pick up the `aws` alias, and the first `aws <anything>` call will prompt you to locate the credential item and unlock it with Touch ID.
 
 **Note**: this is still a long-lived IAM access key, just no longer sitting in plaintext on disk — 1Password's biometric gate is the security improvement, not short-lived credentials. AWS CLI v2 also supports true temporary credentials via IAM Identity Center (SSO) if that's ever worth the bigger setup lift (Console-side permission sets, user assignment) — not pursued yet.
+
+## iTerm2 profile
+
+Two separate pieces of iTerm state are tracked here:
+
+- **Colors** — `init/Solarized Dark.itermcolors` is a color-preset file, imported by `run_once_after_30-import-app-settings.sh` (opens iTerm which prompts to import). Select it in Settings → Profiles → Colors after import.
+- **Everything else** (font, keybindings, cursor, window behavior, session settings) — via iTerm2's **Dynamic Profiles** feature: any JSON file dropped into `~/Library/Application Support/iTerm2/DynamicProfiles/` is auto-loaded at launch. `run_onchange_after_35-install-iterm-profile.sh` installs `init/iterm-profile.json` there when present.
+
+**Populating `init/iterm-profile.json`** (do this once on the machine that has your good profile — the JSON is checked into the public repo, so keep out anything sensitive):
+
+1. iTerm2 → Settings → Profiles → *select your profile* → **Other Actions** ▾ → **Save Profile as JSON**.
+2. Save the result to `init/iterm-profile.json` in this repo.
+3. Commit + push.
+4. On other machines: `chezmoi update`. The `run_onchange` script hashes the JSON and re-runs when it changes, so profile edits propagate on the next apply.
+
+Colors and the Dynamic Profile can coexist: import the color preset once, then in Settings → Profiles select the dynamic profile as default. The dynamic profile picks up whichever color preset is active at export time.
 
 ## Thanks to…
 
