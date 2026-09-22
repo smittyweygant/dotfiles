@@ -1,6 +1,5 @@
 tap "akka/brew"
 tap "common-fate/granted"
-tap "homebrew/services"
 # Extendable version manager with support for Ruby, Node.js, Erlang & more
 brew "asdf"
 # Syntax-highlighted `cat` replacement
@@ -156,8 +155,6 @@ vscode "vscjava.vscode-java-dependency"
 vscode "vscjava.vscode-java-pack"
 vscode "vscjava.vscode-java-test"
 vscode "vscjava.vscode-maven"
-vscode "withfig.fig"
 vscode "yzhang.markdown-all-in-one"
 go "golang.org/x/tools/gopls"
 go "honnef.co/go/tools/cmd/staticcheck"
-npm "corepack"

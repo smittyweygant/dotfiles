@@ -40,4 +40,4 @@ Claude desktop, Claude Code, ChatGPT, Codex, and OneDrive are now casks in the `
 
 ## Open follow-ups from the original survey
 
-Don't reinstall/reconfigure blindly, revisit first: `.asdf` vs `.nvm`/`.pyenv` overlap, `.sf` (Salesforce CLI — moot if Salesforce is dropped), `.odbc.ini`/`.odbcinst.ini`, `.config/temporalio`/`.config/tcld` (moot if Temporal is dropped), the stale `withfig.fig` VS Code extension (Fig was sunset).
+Don't reinstall/reconfigure blindly, revisit first: `.asdf` vs `.nvm`/`.pyenv` overlap, `.sf` (Salesforce CLI — moot if Salesforce is dropped), `.odbc.ini`/`.odbcinst.ini`, `.config/temporalio`/`.config/tcld` (moot if Temporal is dropped).
