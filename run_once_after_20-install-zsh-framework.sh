@@ -9,9 +9,11 @@ ZSH="$HOME/.oh-my-zsh"
 CUSTOM="$ZSH/custom"
 
 clone() {
-  local url="$1" dest="$2"
+  local url="$1" dest="$2" ref="${3:-}"
   if [ -d "$dest/.git" ]; then
     echo "already present: $dest"
+  elif [ -n "$ref" ]; then
+    git clone --depth=1 --branch "$ref" "$url" "$dest"
   else
     git clone --depth=1 "$url" "$dest"
   fi
@@ -20,6 +22,9 @@ clone() {
 clone https://github.com/ohmyzsh/ohmyzsh.git "$ZSH"
 clone https://github.com/romkatv/powerlevel10k.git "$CUSTOM/themes/powerlevel10k"
 clone https://github.com/lukechilds/zsh-nvm "$CUSTOM/plugins/zsh-nvm"
-clone https://github.com/marlonrichert/zsh-autocomplete.git "$CUSTOM/plugins/zsh-autocomplete"
+# Pinned to the latest tagged release, not the default branch: untagged
+# commits past this tag broke `_autocomplete__history_lines` /
+# `_autocomplete__unambiguous` ("command not found") as of 2026-09-22.
+clone https://github.com/marlonrichert/zsh-autocomplete.git "$CUSTOM/plugins/zsh-autocomplete" 26.08.04
 clone https://github.com/zsh-users/zsh-autosuggestions.git "$CUSTOM/plugins/zsh-autosuggestions"
 clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$CUSTOM/plugins/zsh-syntax-highlighting"
