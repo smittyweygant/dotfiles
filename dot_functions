@@ -198,3 +198,41 @@ function undemo() {
 	(( ${+functions[p10k]} )) && p10k reload;
 	clear;
 }
+
+# Keep personal and work Claude Code authentication, settings, plugins, and
+# session history separate. Both use explicit paths so neither identity can
+# accidentally fall back to Claude's legacy default state.
+function claude-personal() {
+	CLAUDE_CONFIG_DIR="$HOME/.claude-personal" command claude "$@";
+}
+
+function claude-work() {
+	CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@";
+}
+
+# Select the profile used by plain `claude` for the rest of this shell. The
+# explicit wrappers above always win, regardless of the current selection.
+function claude-profile() {
+	case "${1:-status}" in
+		personal)
+			export CLAUDE_CONFIG_DIR="$HOME/.claude-personal";
+			echo "Claude profile: personal ($CLAUDE_CONFIG_DIR)";
+			;;
+		work)
+			export CLAUDE_CONFIG_DIR="$HOME/.claude-work";
+			echo "Claude profile: work ($CLAUDE_CONFIG_DIR)";
+			;;
+		status)
+			case "${CLAUDE_CONFIG_DIR:-}" in
+				"") echo "Claude profile: legacy default ($HOME/.claude)" ;;
+				"$HOME/.claude-personal") echo "Claude profile: personal ($HOME/.claude-personal)" ;;
+				"$HOME/.claude-work") echo "Claude profile: work ($HOME/.claude-work)" ;;
+				*) echo "Claude profile: custom ($CLAUDE_CONFIG_DIR)" ;;
+			esac;
+			;;
+		*)
+			echo "Usage: claude-profile {personal|work|status}" >&2;
+			return 2;
+			;;
+	esac;
+}

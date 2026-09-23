@@ -102,6 +102,16 @@ Then run `op plugin init aws` once, choose "Import" and paste in the access key,
 
 **Note**: this is still a long-lived IAM access key, just no longer sitting in plaintext on disk — 1Password's biometric gate is the security improvement, not short-lived credentials. AWS CLI v2 also supports true temporary credentials via IAM Identity Center (SSO) if that's ever worth the bigger setup lift (Console-side permission sets, user assignment) — not pursued yet.
 
+### Claude Code profiles
+
+Claude Code's personal and work logins are isolated with `CLAUDE_CONFIG_DIR`:
+
+- `claude-personal [args...]` always uses the separate `~/.claude-personal` profile.
+- `claude-work [args...]` always uses the separate `~/.claude-work` profile.
+- `claude-profile work` makes plain `claude` use the work profile for the rest of the current shell. `claude-profile personal` switches it back, and `claude-profile status` shows the current selection.
+
+After applying the dotfiles and opening a new shell, run each wrapper once and complete `/login`. Claude creates the profile directories as needed. Authentication, settings, plugins, session history, and global Claude instructions remain separate between the two profiles; project-level `.claude/` files still apply to both.
+
 ## iTerm2 profile
 
 Two separate pieces of iTerm state are tracked here:

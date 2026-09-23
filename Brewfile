@@ -22,6 +22,8 @@ brew "dotnet"
 brew "eza"
 # Play, record, convert, and stream audio and video
 brew "ffmpeg"
+# Command-line JSON processor
+brew "jq"
 # Command-line fuzzy finder
 brew "fzf"
 # GitHub command-line tool
