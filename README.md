@@ -112,9 +112,10 @@ Two separate pieces of iTerm state are tracked here:
 **Populating `init/iterm-profile.json`** (do this once on the machine that has your good profile — the JSON is checked into the public repo, so keep out anything sensitive):
 
 1. iTerm2 → Settings → Profiles → *select your profile* → **Other Actions** ▾ → **Save Profile as JSON**.
-2. Save the result to `init/iterm-profile.json` in this repo.
-3. Commit + push.
-4. On other machines: `chezmoi update`. The `run_onchange` script hashes the JSON and re-runs when it changes, so profile edits propagate on the next apply.
+2. **Wrap the exported file as `{"Profiles": [ <exported object> ] }`** before saving it as `init/iterm-profile.json`. The export button gives you the bare profile object (the format iTerm uses for copy/paste between installations), but the Dynamic Profiles loader that `run_onchange_after_35` targets only recognizes the array-wrapped form — an unwrapped file is silently ignored, not an error, so it's easy to miss.
+3. Save the result to `init/iterm-profile.json` in this repo.
+4. Commit + push.
+5. On other machines: `chezmoi update`. The `run_onchange` script hashes the JSON and re-runs when it changes, so profile edits propagate on the next apply.
 
 Colors and the Dynamic Profile can coexist: import the color preset once, then in Settings → Profiles select the dynamic profile as default. The dynamic profile picks up whichever color preset is active at export time.
 
