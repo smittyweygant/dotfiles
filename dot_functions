@@ -228,7 +228,7 @@ function claude-profile() {
 			;;
 		status)
 			case "${CLAUDE_CONFIG_DIR:-}" in
-				"") echo "Claude profile: legacy default ($HOME/.claude)" ;;
+				"") echo "Claude profile: personal (default via \$HOME/.claude symlink)" ;;
 				"$HOME/.claude-personal") echo "Claude profile: personal ($HOME/.claude-personal)" ;;
 				"$HOME/.claude-work") echo "Claude profile: work ($HOME/.claude-work)" ;;
 				*) echo "Claude profile: custom ($CLAUDE_CONFIG_DIR)" ;;

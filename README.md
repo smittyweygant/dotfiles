@@ -13,6 +13,7 @@ Personal macOS toolchain and configuration, managed with [chezmoi](https://www.c
 - `run_once_after_30-import-app-settings.sh.tmpl` — iTerm2 color preset and other tweaks that need the apps installed first.
 - `run_onchange_after_35-install-iterm-profile.sh.tmpl` — installs `init/iterm-profile.json` as an iTerm2 Dynamic Profile (font, keybindings, cursor, window behavior — everything the `.itermcolors` preset alone doesn't cover). Re-runs when the profile JSON changes. See [iTerm2 profile](#iterm2-profile) for the export flow.
 - `Brewfile` + `run_onchange_10-install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
+- `run_onchange_after_15-install-python.sh` — installs the Python version used by project `.python-version` files through pyenv, without changing pyenv's global version.
 - `MASfile` + `run_onchange_20-install-mas-apps.sh.tmpl` — Mac App Store apps via [`mas`](https://github.com/mas-cli/mas).
 - `APPLICATIONS.md` — apps installed outside Homebrew/the App Store (direct download, MDM) that can't be scripted; a manual-reinstall checklist.
 - `init/` — app-specific settings that get consumed by the scripts above: `Solarized Dark.itermcolors` (iTerm color preset), `Solarized Dark xterm-256color.terminal` (Terminal.app color preset — currently unused), `spectacle.json` (Spectacle keybindings — Spectacle itself is retired), and — when populated — `iterm-profile.json` (full iTerm Dynamic Profile export).
@@ -67,6 +68,15 @@ brew bundle dump --file=Brewfile --describe --force
 
 then review the diff before committing.
 
+### Node.js
+
+The Brewfile installs and links Homebrew's current Node.js as the bootstrap default, along with
+pnpm and Yarn. `nvm` remains available for projects that need a different Node version, but a
+fresh `chezmoi apply` does not depend on an nvm version already being installed.
+
+Python projects use pyenv. Chezmoi installs Python 3.12.8 for project-local selection, while
+leaving the global pyenv version unchanged.
+
 ## Secrets
 
 - Shell env secrets (API keys, tokens) are pulled lazily in `dot_zshrc` via `op read 'op://...'` at shell startup — never rendered into the file itself and never committed.
@@ -111,6 +121,8 @@ Claude Code's personal and work **logins** are isolated with `CLAUDE_CONFIG_DIR`
 - `claude-profile work` makes plain `claude` use the work profile for the rest of the current shell. `claude-profile personal` switches it back, and `claude-profile status` shows the current selection.
 
 Everything except auth is shared between the two: CLAUDE.md, settings, hooks, skills, and full session history live once in `~/.claude-shared` (see the `claude-config` repo's `install.sh`), symlinked into both profile directories. So a thread started under `claude-personal` is just as visible and resumable under `claude-work`, and vice versa — switching profiles only changes which account is paying, not which config or history you see. Only auth credentials and the `akka-mcp-gateway` MCP registration stay genuinely separate per profile, since Claude Code keys both to `$CLAUDE_CONFIG_DIR` itself.
+
+`~/.claude` — the fallback Claude Code uses whenever `$CLAUDE_CONFIG_DIR` isn't set (a bare `claude` in a shell that never ran `claude-profile`, an IDE integration, a background job) — is itself a symlink to `~/.claude-personal`, installed by `claude-config`'s `install.sh`. So any invocation that bypasses the wrapper functions lands on the personal account, never work, by construction rather than convention.
 
 After applying the dotfiles and opening a new shell, run each wrapper once and complete `/login`. Claude creates the profile directories as needed. Project-level `.claude/` files still apply to both.
 
