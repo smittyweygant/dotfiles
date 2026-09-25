@@ -199,9 +199,13 @@ function undemo() {
 	clear;
 }
 
-# Keep personal and work Claude Code authentication, settings, plugins, and
-# session history separate. Both use explicit paths so neither identity can
-# accidentally fall back to Claude's legacy default state.
+# Toggle which Anthropic account (and which plan's quota) a Claude Code
+# session draws against. Config, hooks, skills, and session history are
+# shared between the two profiles (see claude-config's install.sh /
+# ~/.claude-shared) — only auth credentials and the akka-mcp-gateway MCP
+# registration stay separate per profile, since Claude Code itself keys both
+# to $CLAUDE_CONFIG_DIR. Both wrappers use explicit paths so neither identity
+# can accidentally fall back to Claude's legacy default state.
 function claude-personal() {
 	CLAUDE_CONFIG_DIR="$HOME/.claude-personal" command claude "$@";
 }

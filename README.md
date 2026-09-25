@@ -104,13 +104,15 @@ Then run `op plugin init aws` once, choose "Import" and paste in the access key,
 
 ### Claude Code profiles
 
-Claude Code's personal and work logins are isolated with `CLAUDE_CONFIG_DIR`:
+Claude Code's personal and work **logins** are isolated with `CLAUDE_CONFIG_DIR`, so switching profiles is really switching which Anthropic account — and which plan's quota — a session draws against:
 
-- `claude-personal [args...]` always uses the separate `~/.claude-personal` profile.
-- `claude-work [args...]` always uses the separate `~/.claude-work` profile.
+- `claude-personal [args...]` always authenticates as the separate `~/.claude-personal` profile.
+- `claude-work [args...]` always authenticates as the separate `~/.claude-work` profile.
 - `claude-profile work` makes plain `claude` use the work profile for the rest of the current shell. `claude-profile personal` switches it back, and `claude-profile status` shows the current selection.
 
-After applying the dotfiles and opening a new shell, run each wrapper once and complete `/login`. Claude creates the profile directories as needed. Authentication, settings, plugins, session history, and global Claude instructions remain separate between the two profiles; project-level `.claude/` files still apply to both.
+Everything except auth is shared between the two: CLAUDE.md, settings, hooks, skills, and full session history live once in `~/.claude-shared` (see the `claude-config` repo's `install.sh`), symlinked into both profile directories. So a thread started under `claude-personal` is just as visible and resumable under `claude-work`, and vice versa — switching profiles only changes which account is paying, not which config or history you see. Only auth credentials and the `akka-mcp-gateway` MCP registration stay genuinely separate per profile, since Claude Code keys both to `$CLAUDE_CONFIG_DIR` itself.
+
+After applying the dotfiles and opening a new shell, run each wrapper once and complete `/login`. Claude creates the profile directories as needed. Project-level `.claude/` files still apply to both.
 
 ## iTerm2 profile
 
