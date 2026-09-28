@@ -1,0 +1,4 @@
+[user]
+	email = smith.weygant@akka.io
+[url "git@github-akka:"]
+	insteadOf = git@github.com:
