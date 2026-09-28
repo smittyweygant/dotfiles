@@ -1,0 +1,4 @@
+#!/bin/bash
+PYTHON="/Users/smittyweygant/development/call-analysis-suite/call-analysis/processing-pipeline/.venv/bin/python3"
+SCRIPT="/Users/smittyweygant/development/call-analysis-suite/call-analysis/processing-pipeline/whisperx_recorder.py"
+exec "$PYTHON" "$SCRIPT" "$@"

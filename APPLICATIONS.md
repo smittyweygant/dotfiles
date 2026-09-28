@@ -5,6 +5,15 @@ Homebrew casks are tracked in `Brewfile`; Mac App Store apps in `MASfile`. This 
 ## Manual installs (not scriptable)
 
 - **Microsoft Defender / Okta Verify** — deployed by IT/MDM, not installed by hand. Check Self Service / ask IT.
+- **obs-cmd** (CLI control for OBS, used by the whisperx recorder) — no Homebrew formula or cask exists (confirmed via `brew search obs-cmd` against core plus the `akka/brew` and `common-fate/granted` taps already added on this machine). Download the release binary for your architecture from [grigio/obs-cmd](https://github.com/grigio/obs-cmd/releases) (`obs-cmd-x64-macos.tar.gz` Intel / `obs-cmd-arm64-macos.tar.gz` Apple Silicon), `chmod +x`, and place it on `PATH` (e.g. `~/.local/bin`). See `call-analysis/README.md` and `USER_GUIDE.md` for exact commands.
+
+## SwiftBar
+
+`swiftbar` is already a cask in the `Brewfile`. On a fresh machine it still needs its plugin folder pointed at the call-analysis-suite plugin — SwiftBar stores that path in its own preferences, which isn't scriptable from dotfiles:
+
+- Point SwiftBar plugin folder at `~/development/call-analysis-suite/call-analysis/SwiftBarPlugins/` via SwiftBar preferences.
+
+See `~/development/call-analysis-suite/call-analysis/USER_GUIDE.md` (Installation section) for the full setup context, including the OBS/WhisperX pieces dotfiles do automate (repo clone, venv, Keychain seed).
 
 ## First-run: enable "Open at Login"
 
