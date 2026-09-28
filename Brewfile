@@ -51,7 +51,7 @@ brew "gradle"
 # Java-based project management
 brew "maven"
 # Open-source, cross-platform JavaScript runtime environment
-brew "node", link: false
+brew "node"
 # Manage multiple Node.js versions
 brew "nvm"
 # Development kit for the Java programming language
