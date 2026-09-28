@@ -1,0 +1,19 @@
+{
+  "context_base_path": "{{ .chezmoi.homeDir }}/development/call-analysis-suite/call-analysis-prompts",
+  "recording": {
+    "keep_audio": true,
+    "keep_video": false
+  },
+  "llm": {
+    "enabled": true,
+    "account": "personal"
+  },
+  "analysis": {
+    "auto_classify": true,
+    "auto_analyze_confidence": 0.75,
+    "force_manual_all": false,
+    "classifier_prompt_file": "Agent_prompts/_meta/classifier_prompt.md",
+    "vault_write_prompt_file": "Agent_prompts/_meta/vault_write_prompt.md",
+    "vault_path": "~/Obsidian/Smitty's Vault"
+  }
+}
