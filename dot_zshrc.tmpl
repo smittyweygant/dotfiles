@@ -76,6 +76,9 @@ eval "$(pyenv init - zsh)"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 {{- if eq .chezmoi.os "darwin" }}
 export PATH="$HOME/.local/bin:$PATH"
+# Docker Desktop symlinks its CLI (docker, docker-compose, kubectl, etc.) here
+# rather than into /usr/local/bin.
+export PATH="$HOME/.docker/bin:$PATH"
 {{- end }}
 
 # Personal aliases and shell functions — loaded after oh-my-zsh so they
