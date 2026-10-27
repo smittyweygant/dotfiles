@@ -36,6 +36,8 @@ brew "git"
 brew "readline"
 # Command-line interface for SQLite
 brew "sqlite"
+# PostgreSQL client tools (psql, pg_dump) without the server; keg-only, so linked explicitly
+brew "libpq", link: true
 # General-purpose data compression with high compression ratio
 brew "xz"
 # Quickly rewrite git repository history
