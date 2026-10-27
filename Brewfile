@@ -58,6 +58,8 @@ brew "node"
 brew "nvm"
 # Development kit for the Java programming language
 brew "openjdk@17"
+# PAM module that lets Touch ID work for sudo inside tmux/screen
+brew "pam-reattach"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
 # Fast, disk space efficient package manager
