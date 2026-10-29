@@ -1,5 +1,7 @@
 tap "akka/brew"
 tap "common-fate/granted"
+# Record and share terminal sessions
+brew "asciinema"
 # Extendable version manager with support for Ruby, Node.js, Erlang & more
 brew "asdf"
 # Syntax-highlighted `cat` replacement
