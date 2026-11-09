@@ -10,6 +10,7 @@ Personal macOS toolchain and configuration, managed with [chezmoi](https://www.c
 - `run_once_before_05-create-vim-dirs.sh` — creates vim's backup/swap/undo directories.
 - `run_once_after_20-install-zsh-framework.sh` — clones oh-my-zsh, Powerlevel10k, and the custom zsh plugins `.zshrc` expects.
 - `run_once_after_25-install-awscli.sh` — installs AWS CLI v2 via [AWS's official install script](https://awscli.amazonaws.com/v2/install.sh), not Homebrew (its community `awscli` formula lags behind official releases).
+- `run_once_after_26-configure-aws-sso.sh` — prompts for your AWS Identity Center details and adds the SSO profiles; see [AWS credentials](#aws-credentials).
 - `run_once_after_30-import-app-settings.sh.tmpl` — iTerm2 color preset and other tweaks that need the apps installed first.
 - `run_onchange_after_35-install-iterm-profile.sh.tmpl` — installs `init/iterm-profile.json` as an iTerm2 Dynamic Profile (font, keybindings, cursor, window behavior — everything the `.itermcolors` preset alone doesn't cover). Re-runs when the profile JSON changes. See [iTerm2 profile](#iterm2-profile) for the export flow.
 - `Brewfile` + `run_onchange_10-install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
@@ -48,7 +49,7 @@ Prerequisites: signed in to iCloud (Apple ID) and to the **App Store app** (the 
 4. **Per-machine files chezmoi deliberately doesn't create** (open a fresh terminal first):
    - `~/.gitconfig.local` — this machine's git identity, e.g. `[user]` / `name = …` / `email = …`. The tracked `~/.gitconfig` includes it last so it overrides the default.
    - `~/.ssh/config.local` — personal hosts; see [SSH keys](#ssh-keys).
-   - `~/.aws/config` profiles and `aws login` — see [AWS credentials](#aws-credentials).
+   - AWS Identity Center details (prompted by `aws-sso-setup`) and sign-in — see [AWS credentials](#aws-credentials).
 5. **Finish by hand**: pick the Solarized Dark preset and Hack Nerd Font in iTerm2, sign in to the installed apps, and log out/in so the macOS defaults fully apply. Work through `APPLICATIONS.md` for anything not scripted (and its "Undecided" list).
 6. **Verify**: `brew bundle check --file=$(chezmoi source-path)/Brewfile`, `chezmoi diff` (should be empty), and `ssh -T git@github.com`.
 
@@ -80,7 +81,7 @@ leaving the global pyenv version unchanged.
 ## Secrets
 
 - Shell env secrets (API keys, tokens) are pulled lazily in `dot_zshrc` via `op read 'op://...'` at shell startup — never rendered into the file itself and never committed.
-- AWS uses `aws login` (short-lived console credentials) and assumed roles, not a static `~/.aws/credentials` file — see [AWS credentials](#aws-credentials) below.
+- AWS uses IAM Identity Center sign-in (short-lived role credentials), not a static `~/.aws/credentials` file — see [AWS credentials](#aws-credentials) below.
 
 ### SSH keys
 
@@ -96,12 +97,19 @@ All private keys live in the **Development** vault in 1Password — none are sto
 
 ### AWS credentials
 
-Interactive use signs in with `aws login` (a browser sign-in as the `smittoid` IAM user; credentials last up to 12 hours and are cached in `~/.aws/login/cache`). Nothing long-lived sits on disk or behind a shell wrapper.
+AWS access goes through IAM Identity Center. No long-lived key sits on disk or behind a shell wrapper. Two Identity Center users share one account, each with its own sign-in:
+
+- **You** sign in as your own user (`aws sso login --sso-session admin`) and get the `Admin` permission set.
+- **Claude** signs in as a separate `claude` user (`aws sso login --sso-session claude --no-browser`, then open the URL in a private window as that user). It holds `ClaudeDev` (read-only) permanently. `claude-personal` launches with `AWS_PROFILE=claude-dev`.
+- **Write access** is `ClaudeElevated` (EC2, ECR, SSM, Route 53; no `/finances/*` secrets, no host shells). It is assigned to the `claude` user only on request: `claude-elevate [minutes]` grants it, then revokes it after the timer (default 30). `claude-elevate off` revokes now. Revoking removes the role, so issued credentials die at once. It needs your admin sign-in.
+
+How it is wired:
 
 - `run_once_after_25-install-awscli.sh` installs the `aws` binary itself (see [What's here](#whats-here)).
-- `private_dot_aws/create_private_config` seeds `~/.aws/config` with the default region on a new machine and never touches it again (`create_` writes only when the file is missing; `private_` keeps it `0600`). The AWS CLI has no include directive, so this stands in for a `.local` file. `aws login` and the role profiles below write to the live file, which is yours to manage.
-- Assumed-role profiles, defined only in the live `~/.aws/config` (they name an account ID): `claude-dev` (read-only, no prompt), `claude-elevated` (project write access, requires an MFA code) and `admin` (requires an MFA code). Claude sessions use `claude-dev` or `claude-elevated`.
-- The one access key still on the `smittoid` user is not used interactively. Keep it for unattended jobs only, or deactivate it.
+- `private_dot_aws/create_private_config` seeds `~/.aws/config` with the default region on a new machine and never touches it again (`create_` writes only when the file is missing; `private_` keeps it `0600`). The AWS CLI has no include directive, so this stands in for a `.local` file.
+- `run_once_after_26-configure-aws-sso.sh` runs `aws-sso-setup`, which prompts for your organization's account ID, Identity Center instance ARN, identity store ID, portal URL and the two user names. It saves them to `~/.config/aws-sso/env` (never in this repo) and appends the profiles from `init/aws-sso/config.tmpl` to `~/.aws/config`. Re-run `aws-sso-setup` by hand to change an answer.
+- `aws-elevate on|off` (installed to `~/.local/bin`) reads that env file. `claude-elevate` in `dot_functions` wraps it with a timer.
+- `init/aws-sso/create-permission-sets.sh` is the one-time setup for a new organization: it creates the three permission sets from `ClaudeElevated-inline-policy.json` and assigns them. Create the two users in the console first.
 
 **New machine**: after `chezmoi apply` and signing into 1Password, three manual gates the OS/1Password require before `op` can reach the desktop app (needed for `op read` at shell startup) — none are scriptable:
 
@@ -109,9 +117,9 @@ Interactive use signs in with `aws login` (a browser sign-in as the `smittoid` I
 2. **System Settings → Privacy & Security → Full Disk Access → add iTerm2** (or whichever terminal you use), then **fully quit** iTerm2 (⌘Q) and reopen. Without this, `op` can't read the desktop app's settings file inside `~/Library/Group Containers/2BUA8C4S2C.com.1password/` and fails with `operation not permitted` (visible via `OP_DEBUG=1 op whoami`) — a plain "close window" isn't enough; the TCC grant only applies to freshly-launched processes.
 3. **Run `op signin` once** to trigger the Touch ID unlock and open the session; then `op whoami` should print the account.
 
-Then run `aws login` and recreate the role profiles in `~/.aws/config`.
+`chezmoi apply` then prompts for the organization details (or run `aws-sso-setup` later) and you sign in as above.
 
-**Note**: `smittoid` still has `AdministratorAccess`, so the role profiles limit mistakes but not a determined agent. The plan is to move to IAM Identity Center and strip admin from `smittoid`.
+**Note**: Claude's deny rules (in the `claude-config` repo) block the admin profile, the SSO token cache and `aws sso login`, but they are guardrails. SSO tokens sit in `~/.aws/sso/cache`, readable by anything running as you. The separate `claude` user means its own token cannot mint admin credentials.
 
 ### Claude Code profiles
 

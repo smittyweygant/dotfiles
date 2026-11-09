@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ProjectInfrastructure",
+      "Effect": "Allow",
+      "Action": ["ec2:*", "ecr:*", "ssm:*", "route53:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "NoSecretsFromParameterStore",
+      "Effect": "Deny",
+      "Action": ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"],
+      "Resource": "arn:aws:ssm:*:*:parameter/finances/*"
+    },
+    {
+      "Sid": "NoWritingProductionSecrets",
+      "Effect": "Deny",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:DeleteParameter",
+        "ssm:DeleteParameters",
+        "ssm:LabelParameterVersion",
+        "ssm:UnlabelParameterVersion"
+      ],
+      "Resource": "arn:aws:ssm:*:*:parameter/finances/*"
+    },
+    {
+      "Sid": "NoShellOnHosts",
+      "Effect": "Deny",
+      "Action": ["ssm:StartSession", "ssm:SendCommand"],
+      "Resource": "*"
+    }
+  ]
+}

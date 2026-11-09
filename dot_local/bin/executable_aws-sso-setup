@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Records this AWS organization's Identity Center details and adds the SSO
+# profiles to ~/.aws/config. Nothing about the organization lives in the
+# dotfiles repo; the answers go to ~/.config/aws-sso/env (0600), which
+# aws-elevate and init/aws-sso/create-permission-sets.sh read.
+#
+# Re-run to change an answer; the current value is the default. Profiles are
+# appended only when [sso-session claude] is missing from ~/.aws/config.
+set -euo pipefail
+
+ENV_FILE="$HOME/.config/aws-sso/env"
+AWS_CONFIG="$HOME/.aws/config"
+TEMPLATE="$(chezmoi source-path)/init/aws-sso/config.tmpl"
+
+[ -f "$TEMPLATE" ] || { echo "Missing $TEMPLATE" >&2; exit 1; }
+[ -f "$ENV_FILE" ] && . "$ENV_FILE"
+
+ask() {  # var, prompt, default
+  local reply
+  read -r -p "$2${3:+ [$3]}: " reply
+  printf -v "$1" '%s' "${reply:-$3}"
+}
+
+cat <<'EOF'
+Find these in the AWS console under IAM Identity Center. The instance ARN and
+identity store ID are on Settings. The start URL is the AWS access portal URL
+on the dashboard.
+EOF
+
+ask AWS_SSO_ACCOUNT_ID "Management account ID" "${AWS_SSO_ACCOUNT_ID:-}"
+ask AWS_SSO_REGION "Identity Center region" "${AWS_SSO_REGION:-us-west-2}"
+ask AWS_SSO_INSTANCE_ARN "Instance ARN (arn:aws:sso:::instance/ssoins-...)" "${AWS_SSO_INSTANCE_ARN:-}"
+ask AWS_SSO_IDENTITY_STORE_ID "Identity store ID (d-...)" "${AWS_SSO_IDENTITY_STORE_ID:-}"
+ask AWS_SSO_START_URL "Access portal URL" "${AWS_SSO_START_URL:-https://${AWS_SSO_IDENTITY_STORE_ID}.awsapps.com/start}"
+ask AWS_SSO_HUMAN_USER "Your Identity Center user name (Admin)" "${AWS_SSO_HUMAN_USER:-}"
+ask AWS_SSO_CLAUDE_USER "Claude's Identity Center user name" "${AWS_SSO_CLAUDE_USER:-claude}"
+
+for v in AWS_SSO_ACCOUNT_ID AWS_SSO_INSTANCE_ARN AWS_SSO_IDENTITY_STORE_ID AWS_SSO_START_URL \
+         AWS_SSO_HUMAN_USER AWS_SSO_CLAUDE_USER; do
+  [ -n "${!v}" ] || { echo "$v is required" >&2; exit 1; }
+done
+
+mkdir -p "$(dirname "$ENV_FILE")"
+umask 077
+{
+  for v in AWS_SSO_ACCOUNT_ID AWS_SSO_REGION AWS_SSO_INSTANCE_ARN AWS_SSO_IDENTITY_STORE_ID \
+           AWS_SSO_START_URL AWS_SSO_HUMAN_USER AWS_SSO_CLAUDE_USER; do
+    printf '%s=%q\n' "$v" "${!v}"
+  done
+} > "$ENV_FILE"
+echo "Saved $ENV_FILE"
+
+mkdir -p "$(dirname "$AWS_CONFIG")"
+touch "$AWS_CONFIG"
+if grep -q '^\[sso-session claude\]' "$AWS_CONFIG"; then
+  echo "$AWS_CONFIG already has the SSO profiles; left unchanged."
+else
+  {
+    echo
+    sed -e "s|@ACCOUNT_ID@|$AWS_SSO_ACCOUNT_ID|g" \
+        -e "s|@START_URL@|$AWS_SSO_START_URL|g" \
+        -e "s|@REGION@|$AWS_SSO_REGION|g" "$TEMPLATE"
+  } >> "$AWS_CONFIG"
+  echo "Added the claude-dev, claude-elevated and admin profiles to $AWS_CONFIG"
+fi
+
+cat <<'EOF'
+
+Next: sign in with `aws sso login --sso-session admin`. Claude signs in as its
+own user: `aws sso login --sso-session claude --no-browser`, then open the URL
+in a private window as that user. If the permission sets don't exist yet, run
+init/aws-sso/create-permission-sets.sh with the admin profile.
+EOF

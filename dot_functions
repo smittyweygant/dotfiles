@@ -206,14 +206,45 @@ function undemo() {
 # registration stay separate per profile, since Claude Code itself keys both
 # to $CLAUDE_CONFIG_DIR. Both wrappers use explicit paths so neither identity
 # can accidentally fall back to Claude's legacy default state.
-# Sessions default to the read-only AWS role; write access is the MFA-gated
-# claude-elevated profile, which you prime in your own terminal.
+# Sessions default to the read-only claude-dev AWS profile. Write access is
+# the claude-elevated profile, which only works while claude-elevate has
+# granted it.
 function claude-personal() {
 	AWS_PROFILE=claude-dev CLAUDE_CONFIG_DIR="$HOME/.claude-personal" command claude "$@";
 }
 
 function claude-work() {
 	CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@";
+}
+
+# Grant Claude's ClaudeElevated AWS role for N minutes (default 30), then
+# revoke it. `claude-elevate off` revokes now. Needs
+# `aws sso login --sso-session admin` first. The timer runs in this machine's
+# time, so a sleeping laptop delays the revoke; run `claude-elevate off` when
+# done rather than relying on it.
+function claude-elevate() {
+	local arg="${1:-30}"
+	local pidfile="${XDG_CACHE_HOME:-$HOME/.cache}/claude-elevate.pid"
+	if [ -f "$pidfile" ]; then
+		kill "$(cat "$pidfile")" 2>/dev/null
+		rm -f "$pidfile"
+	fi
+	case "$arg" in
+		off)
+			aws-elevate off;
+			;;
+		''|*[!0-9]*)
+			echo "Usage: claude-elevate [minutes|off]" >&2;
+			return 2;
+			;;
+		*)
+			aws-elevate on || return;
+			mkdir -p "$(dirname "$pidfile")";
+			( sleep $(( arg * 60 )); aws-elevate off ) >/dev/null 2>&1 &!
+			echo $! > "$pidfile";
+			echo "ClaudeElevated granted for $arg minutes; allow a few seconds to take effect.";
+			;;
+	esac
 }
 
 # Select the profile used by plain `claude` for the rest of this shell. The

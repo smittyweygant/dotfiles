@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Grants or revokes the ClaudeElevated permission set for Claude's Identity
+# Center user. Run as yourself, with `aws sso login --sso-session admin` done.
+# Revoking removes the role from the account, so credentials already issued
+# stop working at once. Nothing revokes automatically; claude-elevate
+# (dot_functions) schedules the revoke.
+#
+# Usage: aws-elevate on|off
+set -euo pipefail
+
+ENV_FILE="$HOME/.config/aws-sso/env"
+[ -f "$ENV_FILE" ] || { echo "Missing $ENV_FILE; run aws-sso-setup." >&2; exit 1; }
+. "$ENV_FILE"
+
+MODE=${1:?usage: aws-elevate on|off}
+case $MODE in
+  on)  VERB=create-account-assignment ;;
+  off) VERB=delete-account-assignment ;;
+  *)   echo "usage: aws-elevate on|off" >&2; exit 2 ;;
+esac
+
+A="aws --profile admin"
+USER_ID=$($A identitystore get-user-id --identity-store-id "$AWS_SSO_IDENTITY_STORE_ID" \
+  --alternate-identifier "{\"UniqueAttribute\":{\"AttributePath\":\"UserName\",\"AttributeValue\":\"$AWS_SSO_CLAUDE_USER\"}}" \
+  --query UserId --output text)
+
+PS=
+for arn in $($A sso-admin list-permission-sets --instance-arn "$AWS_SSO_INSTANCE_ARN" --query 'PermissionSets[]' --output text); do
+  name=$($A sso-admin describe-permission-set --instance-arn "$AWS_SSO_INSTANCE_ARN" \
+    --permission-set-arn "$arn" --query PermissionSet.Name --output text)
+  if [ "$name" = ClaudeElevated ]; then PS=$arn; break; fi
+done
+[ -n "$PS" ] || { echo "ClaudeElevated permission set not found" >&2; exit 1; }
+
+$A sso-admin "$VERB" --instance-arn "$AWS_SSO_INSTANCE_ARN" --target-id "$AWS_SSO_ACCOUNT_ID" \
+  --target-type AWS_ACCOUNT --permission-set-arn "$PS" \
+  --principal-type USER --principal-id "$USER_ID" --output text
+
+# Each grant creates a new role, so role credentials the CLI cached for the
+# previous one are invalid but look fresh and fail with InvalidClientTokenId.
+# SSO sign-in tokens live in ~/.aws/sso/cache and are not touched.
+rm -f "$HOME"/.aws/cli/cache/*.json

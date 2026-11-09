@@ -1,0 +1,33 @@
+[sso-session claude]
+sso_start_url = @START_URL@
+sso_region = @REGION@
+sso_registration_scopes = sso:account:access
+
+[sso-session admin]
+sso_start_url = @START_URL@
+sso_region = @REGION@
+sso_registration_scopes = sso:account:access
+
+[profile claude-dev]
+sso_session = claude
+sso_account_id = @ACCOUNT_ID@
+sso_role_name = ClaudeDev
+region = @REGION@
+
+[profile claude-elevated]
+sso_session = claude
+sso_account_id = @ACCOUNT_ID@
+sso_role_name = ClaudeElevated
+region = @REGION@
+
+[profile admin]
+sso_session = admin
+sso_account_id = @ACCOUNT_ID@
+sso_role_name = Admin
+region = @REGION@
+
+[profile readonly]
+sso_session = admin
+sso_account_id = @ACCOUNT_ID@
+sso_role_name = ReadOnly
+region = @REGION@
