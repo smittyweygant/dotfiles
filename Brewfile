@@ -86,6 +86,8 @@ brew "zsh-syntax-highlighting"
 brew "akka/brew/akka", trusted: true
 # Command-line interface for 1Password
 cask "1password-cli"
+# Microsoft Azure command-line interface
+cask "azure-cli"
 # App to build and share containerised applications and microservices
 cask "docker-desktop"
 cask "font-hack-nerd-font"
