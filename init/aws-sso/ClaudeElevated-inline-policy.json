@@ -20,7 +20,8 @@
       "Resource": [
         "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/releases/*",
         "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/backups/*",
-        "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/models/*"
+        "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/models/*",
+        "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/archive/*"
       ]
     },
     {

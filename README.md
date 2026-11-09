@@ -101,7 +101,7 @@ AWS access goes through IAM Identity Center. No long-lived key sits on disk or b
 
 - **You** sign in as your own user (`aws sso login --sso-session admin`) and get the `Admin` permission set.
 - **Claude** signs in as a separate `claude` user (`aws sso login --sso-session claude --no-browser`, then open the URL in a private window as that user). It holds `ClaudeDev` (read-only) permanently. `claude-personal` launches with `AWS_PROFILE=claude-dev`.
-- **Write access** is `ClaudeElevated` (EC2, ECR, SSM, Route 53, and get/put on the `releases/`, `backups/` and `models/` prefixes of the finances bucket, with no delete; Parameter Store `/finances/*` is denied and `StartSession` is denied, but `SendCommand` is allowed, so a command run on the host can still reach its secrets; review the command before you elevate). It is assigned to the `claude` user only on request: `claude-elevate [minutes]` grants it, then revokes it after the timer (default 30). `claude-elevate off` revokes now. Revoking removes the role, so issued credentials die at once. It needs your admin sign-in.
+- **Write access** is `ClaudeElevated` (EC2, ECR, SSM, Route 53, and get/put on the `releases/`, `backups/`, `models/` and `archive/` prefixes of the finances bucket, with no delete; Parameter Store `/finances/*` is denied and `StartSession` is denied, but `SendCommand` is allowed, so a command run on the host can still reach its secrets; review the command before you elevate). It is assigned to the `claude` user only on request: `claude-elevate [minutes]` grants it, then revokes it after the timer (default 30). `claude-elevate off` revokes now. Revoking removes the role, so issued credentials die at once. It needs your admin sign-in.
 
 How it is wired:
 
