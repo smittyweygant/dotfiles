@@ -8,6 +8,22 @@
       "Resource": "*"
     },
     {
+      "Sid": "FinancesBucketList",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}"
+    },
+    {
+      "Sid": "FinancesBucketObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject"],
+      "Resource": [
+        "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/releases/*",
+        "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/backups/*",
+        "arn:aws:s3:::finances-deploy-${aws:PrincipalAccount}/models/*"
+      ]
+    },
+    {
       "Sid": "NoSecretsFromParameterStore",
       "Effect": "Deny",
       "Action": ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"],
@@ -26,9 +42,9 @@
       "Resource": "arn:aws:ssm:*:*:parameter/finances/*"
     },
     {
-      "Sid": "NoShellOnHosts",
+      "Sid": "NoInteractiveShellOnHosts",
       "Effect": "Deny",
-      "Action": ["ssm:StartSession", "ssm:SendCommand"],
+      "Action": ["ssm:StartSession"],
       "Resource": "*"
     }
   ]

@@ -29,7 +29,7 @@ make_permission_set() {  # name, duration, description -> ARN
     --query 'PermissionSet.PermissionSetArn' --output text
 }
 ClaudeDev=$(make_permission_set ClaudeDev PT8H "Read-only, for Claude Code sessions")
-ClaudeElevated=$(make_permission_set ClaudeElevated PT1H "EC2, ECR, SSM, Route 53 write; no production secrets or host shells")
+ClaudeElevated=$(make_permission_set ClaudeElevated PT1H "EC2, ECR, SSM, Route 53 write; finances bucket read/write; Parameter Store /finances/* denied, no interactive host shells")
 Admin=$(make_permission_set Admin PT1H "Full administrator, human only")
 ReadOnly=$(make_permission_set ReadOnly PT8H "Read-only including data, human only")
 
