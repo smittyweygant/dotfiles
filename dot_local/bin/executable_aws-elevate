@@ -19,7 +19,7 @@ case $MODE in
   *)   echo "usage: aws-elevate on|off" >&2; exit 2 ;;
 esac
 
-A="aws --profile admin"
+A="aws --profile admin --no-cli-pager"
 USER_ID=$($A identitystore get-user-id --identity-store-id "$AWS_SSO_IDENTITY_STORE_ID" \
   --alternate-identifier "{\"UniqueAttribute\":{\"AttributePath\":\"UserName\",\"AttributeValue\":\"$AWS_SSO_CLAUDE_USER\"}}" \
   --query UserId --output text)
