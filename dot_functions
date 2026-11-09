@@ -206,8 +206,10 @@ function undemo() {
 # registration stay separate per profile, since Claude Code itself keys both
 # to $CLAUDE_CONFIG_DIR. Both wrappers use explicit paths so neither identity
 # can accidentally fall back to Claude's legacy default state.
+# Sessions default to the read-only AWS role; write access is the MFA-gated
+# claude-elevated profile, which you prime in your own terminal.
 function claude-personal() {
-	CLAUDE_CONFIG_DIR="$HOME/.claude-personal" command claude "$@";
+	AWS_PROFILE=claude-dev CLAUDE_CONFIG_DIR="$HOME/.claude-personal" command claude "$@";
 }
 
 function claude-work() {

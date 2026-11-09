@@ -86,11 +86,6 @@ export PATH="$HOME/.docker/bin:$PATH"
 [[ -f ~/.aliases ]] && source ~/.aliases
 [[ -f ~/.functions ]] && source ~/.functions
 
-# 1Password CLI shell plugins (aws, gh, etc.) — must load after oh-my-zsh
-# so the op-wrapped `aws` function takes precedence over oh-my-zsh's
-# bundled aws plugin.
-[[ -f ~/.config/op/plugins.sh ]] && source ~/.config/op/plugins.sh
-
 # Per-project secrets (e.g. ANTHROPIC_API_KEY) load lazily via direnv's
 # .envrc in the projects that need them, instead of eagerly for every
 # shell — avoids a biometric prompt on every new tab/pane.
