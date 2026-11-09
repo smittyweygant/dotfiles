@@ -99,7 +99,7 @@ All private keys live in the **Development** vault in 1Password — none are sto
 Interactive use signs in with `aws login` (a browser sign-in as the `smittoid` IAM user; credentials last up to 12 hours and are cached in `~/.aws/login/cache`). Nothing long-lived sits on disk or behind a shell wrapper.
 
 - `run_once_after_25-install-awscli.sh` installs the `aws` binary itself (see [What's here](#whats-here)).
-- `private_dot_aws/private_config` → `~/.aws/config` (just the default region — no secrets, `private_` prefix keeps it `0600`). `aws login` adds `login_session` to the live file, and so do the role profiles below, so a `chezmoi apply` overwrites them.
+- `private_dot_aws/create_private_config` seeds `~/.aws/config` with the default region on a new machine and never touches it again (`create_` writes only when the file is missing; `private_` keeps it `0600`). The AWS CLI has no include directive, so this stands in for a `.local` file. `aws login` and the role profiles below write to the live file, which is yours to manage.
 - Assumed-role profiles, defined only in the live `~/.aws/config` (they name an account ID): `claude-dev` (read-only, no prompt), `claude-elevated` (project write access, requires an MFA code) and `admin` (requires an MFA code). Claude sessions use `claude-dev` or `claude-elevated`.
 - The one access key still on the `smittoid` user is not used interactively. Keep it for unattended jobs only, or deactivate it.
 
