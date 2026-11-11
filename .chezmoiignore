@@ -1,5 +1,6 @@
 # Repo-management files that should never be deployed into $HOME.
 README.md
+CLAUDE.md
 LICENSE-MIT.txt
 init
 Brewfile

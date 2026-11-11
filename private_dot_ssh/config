@@ -5,13 +5,6 @@
 # comes after any Host block (reproduced on OpenSSH_10.2p1/LibreSSL).
 Include config.local
 
-Host github.com
-  IdentityFile ~/.ssh/github_ssh_2026_04.pub
-
-Host github-akka
-  HostName github.com
-  IdentityFile ~/.ssh/github_akka_ssh_2026_09.pub
-
 Host *
 #  ControlMaster auto
 #  ControlPersist 10m

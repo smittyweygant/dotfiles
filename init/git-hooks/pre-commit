@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Blocks commits that put personal SSH hosts into the public repo.
+# private_dot_ssh/config may only contain `Host *` blocks; every other host
+# belongs in ~/.ssh/config.local, which is gitignored. Checks the staged
+# content, not the working tree.
+set -euo pipefail
+
+FILE=private_dot_ssh/config
+
+git diff --cached --name-only | grep -qx "$FILE" || exit 0
+
+bad=$(git show ":$FILE" | grep -nE '^[[:space:]]*Host[[:space:]]' \
+  | grep -vE ':[[:space:]]*Host[[:space:]]+\*[[:space:]]*$' || true)
+
+if [ -n "$bad" ]; then
+  echo "pre-commit: $FILE has Host entries other than 'Host *':" >&2
+  echo "$bad" | sed 's/^/  line /' >&2
+  echo "Personal hosts and key names go in ~/.ssh/config.local, never in this public repo." >&2
+  exit 1
+fi
