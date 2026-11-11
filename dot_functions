@@ -214,7 +214,13 @@ function claude-personal() {
 }
 
 function claude-work() {
-	CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@";
+	AWS_PROFILE=claude-dev CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@";
+}
+
+# Plain `claude` also gets claude-dev, so a shell holding the human ReadOnly
+# or Admin profile (see aws-login) never passes it on to a Claude session.
+function claude() {
+	AWS_PROFILE=claude-dev command claude "$@";
 }
 
 # Grant Claude's ClaudeElevated AWS role for N minutes (default 30), then
@@ -245,6 +251,26 @@ function claude-elevate() {
 			echo "ClaudeElevated granted for $arg minutes; allow a few seconds to take effect.";
 			;;
 	esac
+}
+
+# Sign in to AWS as yourself and make read-only the profile for this shell.
+# Anything started from this shell inherits it, so launch Claude through
+# claude-personal or claude-work, which set claude-dev explicitly.
+function aws-login() {
+	aws sso login --sso-session admin && export AWS_PROFILE=readonly;
+}
+
+# Open a subshell with the Admin profile that exits after N idle minutes
+# (default 10). `exit` leaves early. The parent shell keeps its own profile.
+function aws-admin() {
+	local mins="${1:-10}"
+	case "$mins" in
+		''|*[!0-9]*) echo "Usage: aws-admin [minutes]" >&2; return 2 ;;
+	esac
+	aws --profile admin sts get-caller-identity >/dev/null 2>&1 \
+		|| aws sso login --sso-session admin || return
+	echo "Admin profile; exits after $mins idle minutes. Type exit to leave."
+	AWS_PROFILE=admin TMOUT=$(( mins * 60 )) zsh
 }
 
 # Select the profile used by plain `claude` for the rest of this shell. The
