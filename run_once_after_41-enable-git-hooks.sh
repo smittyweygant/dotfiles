@@ -3,4 +3,6 @@
 # versioned, so each machine opts in once.
 set -euo pipefail
 
-git -C "$(chezmoi source-path)" config core.hooksPath init/git-hooks
+# chezmoi holds its state lock while it runs scripts, so `chezmoi source-path`
+# would wait on that lock and fail; it exports the directory instead.
+git -C "$CHEZMOI_SOURCE_DIR" config core.hooksPath init/git-hooks

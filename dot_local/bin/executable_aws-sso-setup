@@ -10,7 +10,8 @@ set -euo pipefail
 
 ENV_FILE="$HOME/.config/aws-sso/env"
 AWS_CONFIG="$HOME/.aws/config"
-TEMPLATE="$(chezmoi source-path)/init/aws-sso/config.tmpl"
+# Under `chezmoi apply` the state lock is held, so use the exported directory.
+TEMPLATE="${CHEZMOI_SOURCE_DIR:-$(chezmoi source-path)}/init/aws-sso/config.tmpl"
 
 [ -f "$TEMPLATE" ] || { echo "Missing $TEMPLATE" >&2; exit 1; }
 [ -f "$ENV_FILE" ] && . "$ENV_FILE"
