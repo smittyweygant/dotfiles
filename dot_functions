@@ -224,10 +224,10 @@ function claude() {
 }
 
 # Grant Claude's ClaudeElevated AWS role for N minutes (default 30), then
-# revoke it. `claude-elevate off` revokes now. Needs
-# `aws sso login --sso-session admin` first. The timer runs in this machine's
-# time, so a sleeping laptop delays the revoke; run `claude-elevate off` when
-# done rather than relying on it.
+# revoke it. `claude-elevate off` revokes now. Needs an `admin` SSO sign-in
+# (not the `claude` session); it prompts for one if the token has expired. The
+# timer runs in this machine's time, so a sleeping laptop delays the revoke;
+# run `claude-elevate off` when done rather than relying on it.
 function claude-elevate() {
 	local arg="${1:-30}"
 	local pidfile="${XDG_CACHE_HOME:-$HOME/.cache}/claude-elevate.pid"
@@ -244,6 +244,8 @@ function claude-elevate() {
 			return 2;
 			;;
 		*)
+			aws --profile admin sts get-caller-identity >/dev/null 2>&1 \
+				|| aws sso login --sso-session admin || return;
 			aws-elevate on || return;
 			mkdir -p "$(dirname "$pidfile")";
 			( sleep $(( arg * 60 )); aws-elevate off ) >/dev/null 2>&1 &!
