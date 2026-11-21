@@ -75,12 +75,13 @@ bash to run them, and the host does not want what they install.
 | 45-clone-call-analysis-repos | Mac-only | Feeds the WhisperX recorder. |
 | 50-setup-call-analysis-venv | Mac-only | Same. |
 | 55-seed-obs-keychain | Mac-only | macOS Keychain (`security`). |
+| 60-install-wsl | Windows-only | `wsl --install` of Ubuntu 24.04 when no distro exists. Needs UAC and usually a reboot. |
 
 The WhisperX recorder and `~/.config/whisperx` are Mac-only too.
 
 ## Windows host
 
-Windows gets `.gitconfig`, `.gitconfig-akka`, `.editorconfig` and the three
+Windows gets `.gitconfig`, `.gitconfig-akka`, `.editorconfig` and the four
 `.ps1` scripts; `.chezmoiignore` is an allowlist there, so anything added
 later stays off Windows unless named. Windows Terminal
 rewrites its `settings.json` itself, so the file is not a chezmoi target; the
