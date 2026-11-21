@@ -3,6 +3,28 @@ README.md
 CLAUDE.md
 LICENSE-MIT.txt
 init
+docs
 Brewfile
 MASfile
 APPLICATIONS.md
+
+{{- if ne .chezmoi.os "darwin" }}
+
+# Mac-only files and scripts. docs/cross-platform.md classifies every script.
+# Scripts match by target name: the source name without its run_* prefix.
+.config/whisperx
+.local/bin/whisperx-recorder
+06-enable-touchid-sudo.sh
+10-macos-defaults.sh
+10-install-packages.sh
+20-install-mas-apps.sh
+27-install-nx-tether.sh
+30-import-app-settings.sh
+35-install-iterm-profile.sh
+45-clone-call-analysis-repos.sh
+50-setup-call-analysis-venv.sh
+55-seed-obs-keychain.sh
+
+# Shared in purpose, but need a Linux path first (dotfiles #4).
+15-install-python.sh
+{{- end }}
