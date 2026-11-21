@@ -1,0 +1,3 @@
+{{- /* Renders "true" under WSL, empty elsewhere. WSL is Linux on a Microsoft
+kernel. The ssh config and gitconfig read this to pick the 1Password path. */ -}}
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}true{{ end -}}

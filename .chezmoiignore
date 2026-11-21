@@ -6,6 +6,7 @@ init
 docs
 Brewfile
 MASfile
+Aptfile
 APPLICATIONS.md
 
 {{- if ne .chezmoi.os "darwin" }}
@@ -24,7 +25,11 @@ APPLICATIONS.md
 45-clone-call-analysis-repos.sh
 50-setup-call-analysis-venv.sh
 55-seed-obs-keychain.sh
+{{- end }}
 
-# Shared in purpose, but need a Linux path first (dotfiles #4).
-15-install-python.sh
+{{- if ne .chezmoi.os "linux" }}
+
+# Linux-only scripts.
+10-install-apt-packages.sh
+43-install-claude-code.sh
 {{- end }}

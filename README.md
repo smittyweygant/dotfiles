@@ -1,11 +1,11 @@
 # Smitty's dotfiles
 
-Personal macOS toolchain and configuration, managed with [chezmoi](https://www.chezmoi.io/). Originally forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles); restructured to be reproducible on a fresh machine.
+Personal macOS and Linux (including WSL2) toolchain and configuration, managed with [chezmoi](https://www.chezmoi.io/). Originally forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles); restructured to be reproducible on a fresh machine.
 
 ## What's here
 
 - Shell config (zsh + oh-my-zsh + Powerlevel10k), editor config (vim), git config, and assorted CLI tool dotfiles — all managed as `dot_*` files that chezmoi renders into `$HOME`.
-- `private_dot_ssh/config` + `dot_config/private_1Password/ssh/agent.toml` — SSH client config and 1Password SSH agent scoping. No private keys are ever tracked here; see [SSH keys](#ssh-keys) below.
+- `private_dot_ssh/config.tmpl` + `dot_config/private_1Password/ssh/agent.toml` — SSH client config and 1Password SSH agent scoping. No private keys are ever tracked here; see [SSH keys](#ssh-keys) below.
 - `run_once_before_10-macos-defaults.sh.tmpl` — macOS system preference tweaks (`defaults write` commands), runs once on a fresh machine.
 - `run_once_before_05-create-vim-dirs.sh` — creates vim's backup/swap/undo directories.
 - `run_once_after_20-install-zsh-framework.sh` — clones oh-my-zsh, Powerlevel10k, and the custom zsh plugins `.zshrc` expects.
@@ -14,6 +14,8 @@ Personal macOS toolchain and configuration, managed with [chezmoi](https://www.c
 - `run_once_after_30-import-app-settings.sh.tmpl` — iTerm2 color preset and other tweaks that need the apps installed first.
 - `run_onchange_after_35-install-iterm-profile.sh.tmpl` — installs `init/iterm-profile.json` as an iTerm2 Dynamic Profile (font, keybindings, cursor, window behavior — everything the `.itermcolors` preset alone doesn't cover). Re-runs when the profile JSON changes. See [iTerm2 profile](#iterm2-profile) for the export flow.
 - `Brewfile` + `run_onchange_10-install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
+- `Aptfile` + `run_onchange_10-install-apt-packages.sh.tmpl` — Linux only: apt packages, pyenv, and zsh as the login shell. Re-runs when the Aptfile changes.
+- `run_once_after_43-install-claude-code.sh` — Linux only: Claude Code's native installer, run after claude-config.
 - `run_onchange_after_15-install-python.sh` — installs the Python version used by project `.python-version` files through pyenv, without changing pyenv's global version.
 - `MASfile` + `run_onchange_20-install-mas-apps.sh.tmpl` — Mac App Store apps via [`mas`](https://github.com/mas-cli/mas).
 - `APPLICATIONS.md` — apps installed outside Homebrew/the App Store (direct download, MDM) that can't be scripted; a manual-reinstall checklist.
@@ -53,6 +55,21 @@ Prerequisites: signed in to iCloud (Apple ID) and to the **App Store app** (the 
 5. **Finish by hand**: pick the Solarized Dark preset and Hack Nerd Font in iTerm2, sign in to the installed apps, and log out/in so the macOS defaults fully apply. Work through `APPLICATIONS.md` for anything not scripted (and its "Undecided" list).
 6. **Verify**: `brew bundle check --file=$(chezmoi source-path)/Brewfile`, `chezmoi diff` (should be empty), and `ssh -T git@github.com`.
 
+## Linux and WSL2 setup
+
+Ubuntu 24.04, on a dev box or in WSL2. Needs `sudo`.
+
+1. **1Password.** On a Linux box, install the 1Password app and CLI from [1Password's apt repo](https://support.1password.com/install-linux/), sign in, and turn on the SSH agent (Settings → Developer). Its socket is `~/.1password/agent.sock`. In WSL, set up 1Password on Windows instead; WSL needs nothing here.
+2. **Install chezmoi and apply.** HTTPS, as on the Mac:
+   ```bash
+   sudo apt-get install -y curl git
+   sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin init --apply smittyweygant
+   ```
+   The apt script installs the `Aptfile` and pyenv, and makes zsh the login shell. The shared scripts follow: zsh framework, AWS CLI, SDKMAN, Python, claude-config, then Claude Code.
+3. **Per-machine files**, as in step 4 above: `~/.gitconfig.local`, `~/.ssh/config.local`, AWS SSO.
+4. **WSL only:** git runs Windows' `ssh.exe` (set in `~/.gitconfig`), so SSH hosts and key stubs belong in the Windows `~/.ssh/config`, including the `github-akka` alias that `~/.gitconfig-akka` uses. The Linux `~/.ssh/config` serves only plain `ssh` from WSL, which has no agent.
+5. **Verify:** open a new terminal, then `chezmoi diff` (empty), `ssh -T git@github.com` (or `ssh.exe -T git@github.com` in WSL), `claude-personal`, `claude-work`.
+
 ## Day-to-day usage
 
 ```bash
@@ -87,13 +104,13 @@ leaving the global pyenv version unchanged.
 
 All private keys live in the **Development** vault in 1Password — none are stored in `~/.ssh` or this repo. The 1Password SSH agent serves them transparently:
 
-- `private_dot_ssh/config` sets `IdentityAgent` to 1Password's socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`) under the catch-all `Host *` block, and includes `github.com` directly (nothing sensitive there). Per-host `IdentityFile` lines point at `.pub` files only — these just pin *which* key to offer for a given host; the agent supplies the actual private material.
+- `private_dot_ssh/config.tmpl` sets `IdentityAgent` to 1Password's socket (`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock` on the Mac, `~/.1password/agent.sock` on Linux; none under WSL, where git uses `ssh.exe`) under the catch-all `Host *` block, and includes `github.com` directly (nothing sensitive there). Per-host `IdentityFile` lines point at `.pub` files only — these just pin *which* key to offer for a given host; the agent supplies the actual private material.
 - `dot_config/private_1Password/ssh/agent.toml` scopes the agent to the Development vault (`vault = "Development"`). Creating a custom `agent.toml` overrides 1Password's default vault behavior, so every key that should be available over SSH needs to live in that vault — dropping a new key into a different vault silently won't show up in `ssh-add -l` until moved.
 - `private_dot_ssh/.gitignore` is a repo-only allowlist (`config` and `*.pub` only) so this directory can never accidentally pick up a real private key, even if something is copied in carelessly later. It's not deployed to `$HOME` itself — chezmoi skips literal dotfiles in the source tree.
-- **Personal infra (home LAN IPs, EC2 hostnames, Tailscale FQDN) lives in `~/.ssh/config.local`, gitignored and never part of this public repo at all** — not obfuscated/templated, just not tracked. `private_dot_ssh/config` pulls it in via `Include config.local` as the very **first** line in the file — OpenSSH (tested on 10.2p1/LibreSSL) silently ignores an `Include` that comes after any `Host` block, so don't reorder this.
+- **Personal infra (home LAN IPs, EC2 hostnames, Tailscale FQDN) lives in `~/.ssh/config.local`, gitignored and never part of this public repo at all** — not obfuscated/templated, just not tracked. `private_dot_ssh/config.tmpl` pulls it in via `Include config.local` as the very **first** line in the file — OpenSSH (tested on 10.2p1/LibreSSL) silently ignores an `Include` that comes after any `Host` block, so don't reorder this.
 - `run_after_42-sync-ssh-pubkeys.sh` runs on every `chezmoi apply`. It reads `~/.ssh/config.local` for `IdentityFile ~/.ssh/<name>.pub` lines, and for any `.pub` stub that doesn't exist locally yet, looks up a 1Password SSH Key item in the Development vault whose title contains `<name>` and writes the stub from its public key field. Without the matching stub, ssh can't tell the agent which key to offer for that host — it falls back to offering *every* key the agent holds, which can exceed the server's `MaxAuthTries` before reaching the right one (seen first-hand: "Too many authentication failures" with no Touch ID prompt, because the matching key was never tried). The script is a no-op if `config.local` doesn't exist yet, if a stub already exists, or if 1Password's authorization times out (retries silently on the next apply) — it never blocks `chezmoi apply`.
 
-**New machine**: after signing into the 1Password app (step 2 above) and running `chezmoi apply`, `private_dot_ssh/config` and `agent.toml` land automatically, but `~/.ssh/config.local` does not — it's deliberately never in this repo (not even in git history), so recreate it by hand from memory/your own separate notes before those personal hosts will resolve. Once it's in place, the next `chezmoi apply` (or running `run_after_42-sync-ssh-pubkeys.sh` directly) backfills the `.pub` stubs for any key that's already in the Development vault. The one manual step that's never scriptable: if a key isn't in 1Password yet at all, open it in the 1Password app (or drag the key file onto the window) so it's actually there to match against — the keys themselves live in your 1Password account and sync there, not through this repo.
+**New machine**: after signing into the 1Password app (step 2 above) and running `chezmoi apply`, `~/.ssh/config` and `agent.toml` land automatically, but `~/.ssh/config.local` does not — it's deliberately never in this repo (not even in git history), so recreate it by hand from memory/your own separate notes before those personal hosts will resolve. Once it's in place, the next `chezmoi apply` (or running `run_after_42-sync-ssh-pubkeys.sh` directly) backfills the `.pub` stubs for any key that's already in the Development vault. The one manual step that's never scriptable: if a key isn't in 1Password yet at all, open it in the 1Password app (or drag the key file onto the window) so it's actually there to match against — the keys themselves live in your 1Password account and sync there, not through this repo.
 
 ### AWS credentials
 

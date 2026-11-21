@@ -5,6 +5,13 @@
 	lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 [init]
 	defaultBranch = main
+{{- if includeTemplate "is-wsl" . }}
+# Under WSL, use Windows' ssh.exe so git reaches the 1Password agent on the
+# Windows side. Host aliases such as github-akka must exist in the Windows
+# ~/.ssh/config.
+[core]
+	sshCommand = ssh.exe
+{{- end }}
 # Work repos live under ~/akka/ and use a separate SSO-authorized identity/key;
 # see dot_gitconfig-akka.
 [includeIf "gitdir:~/akka/"]

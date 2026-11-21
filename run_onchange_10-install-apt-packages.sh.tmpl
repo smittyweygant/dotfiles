@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Aptfile hash: {{ include "Aptfile" | sha256sum }}
+# Linux counterpart of the Homebrew bundle. Re-runs whenever Aptfile changes.
+# Also clones pyenv, which apt lacks (matching the zsh framework script), and
+# makes zsh the login shell. Idempotent.
+set -euo pipefail
+
+mapfile -t packages < <(grep -vE '^[[:space:]]*(#|$)' "{{ .chezmoi.sourceDir }}/Aptfile")
+
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}"
+
+# .exports sets LC_ALL=en_US.UTF-8; minimal images ship without it.
+sudo locale-gen en_US.UTF-8
+
+if [ ! -d "$HOME/.pyenv/.git" ]; then
+  git clone --depth=1 https://github.com/pyenv/pyenv.git "$HOME/.pyenv"
+fi
+
+zsh_path="$(command -v zsh)"
+if [ "$(getent passwd "$USER" | cut -d: -f7)" != "$zsh_path" ]; then
+  sudo chsh -s "$zsh_path" "$USER"
+fi
