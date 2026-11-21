@@ -13,7 +13,7 @@ APPLICATIONS.md
 # Mac-only files and scripts. docs/cross-platform.md classifies every script.
 # Scripts match by target name: the source name without its run_* prefix.
 .config/whisperx
-executable_dot_local
+.local/bin/whisperx-recorder
 06-enable-touchid-sudo.sh
 10-macos-defaults.sh
 10-install-packages.sh
