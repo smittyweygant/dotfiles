@@ -1,9 +1,15 @@
-{{- /* chezmoi renders this into its own config file at `chezmoi init`. It is
-empty except on Windows, where it lets chezmoi run the .ps1 scripts: Windows
-PowerShell's default policy (Restricted) refuses every script file, and
-chezmoi's temporary copies are unsigned. Bypass applies to that one process
-only; the machine's policy is not changed. */ -}}
+{{- /* chezmoi renders this into its own config file at `chezmoi init`.
+
+sourceDir records the directory init ran from, so a clone outside chezmoi's
+default location keeps working after the config is regenerated.
+
+The Windows block lets chezmoi run the .ps1 scripts: Windows PowerShell's
+default policy (Restricted) refuses every script file, and chezmoi's temporary
+copies are unsigned. Bypass applies to that one process only; the machine's
+policy is not changed. */ -}}
+sourceDir = {{ .chezmoi.sourceDir | quote }}
 {{- if eq .chezmoi.os "windows" }}
+
 [interpreters.ps1]
     command = "powershell"
     args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File"]

@@ -86,7 +86,8 @@ rewrites its `settings.json` itself, so the file is not a chezmoi target; the
 script merges a fragment into it instead. chezmoi needs `.chezmoi.toml.tmpl`
 to run `.ps1` scripts at all: Windows PowerShell's default execution policy
 is Restricted, and the template gives chezmoi's interpreter a per-process
-Bypass. The template renders empty on other systems.
+Bypass. On every OS the template also records `sourceDir`, so a clone outside
+chezmoi's default directory survives a `chezmoi init`.
 
 ## 1Password SSH
 
