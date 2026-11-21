@@ -24,6 +24,9 @@ Gitignored or untracked files on each machine, recreated by hand:
   `aws-sso-setup`.
 - `~/.aws/config` — seeded once by `create_private_config`; chezmoi never
   overwrites it.
+- The Windows `~/.ssh/config` — unmanaged on Windows. Both Windows git and WSL
+  git run Windows' `ssh.exe`, so every `Host` alias and `.pub` stub for that
+  machine lives there.
 
 When a task needs a new personal value, add or extend a `.local` file and read
 it from a script. Do not template it into a tracked file.

@@ -1,0 +1,36 @@
+{
+	"$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+	"Sources": [
+		{
+			"Packages": [
+				{ "PackageIdentifier": "AgileBits.1Password" },
+				{ "PackageIdentifier": "Anaconda.Miniconda3" },
+				{ "PackageIdentifier": "Anthropic.Claude" },
+				{ "PackageIdentifier": "ArduinoSA.IDE.stable" },
+				{ "PackageIdentifier": "Dropbox.Dropbox" },
+				{ "PackageIdentifier": "Git.Git" },
+				{ "PackageIdentifier": "GitHub.cli" },
+				{ "PackageIdentifier": "JetBrains.DataGrip" },
+				{ "PackageIdentifier": "Logitech.LGS" },
+				{ "PackageIdentifier": "Microsoft.PowerShell" },
+				{ "PackageIdentifier": "Microsoft.Teams" },
+				{ "PackageIdentifier": "Microsoft.VisualStudioCode.Insiders" },
+				{ "PackageIdentifier": "Microsoft.WindowsTerminal" },
+				{ "PackageIdentifier": "Oracle.VirtualBox" },
+				{ "PackageIdentifier": "Python.Python.3.12" },
+				{ "PackageIdentifier": "RedHat.VirtIO" },
+				{ "PackageIdentifier": "SlackTechnologies.Slack" },
+				{ "PackageIdentifier": "twpayne.chezmoi" },
+				{ "PackageIdentifier": "Valve.Steam" },
+				{ "PackageIdentifier": "VideoLAN.VLC" },
+				{ "PackageIdentifier": "Zoom.Zoom.EXE" }
+			],
+			"SourceDetails": {
+				"Argument": "https://cdn.winget.microsoft.com/cache",
+				"Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+				"Name": "winget",
+				"Type": "Microsoft.PreIndexed.Package"
+			}
+		}
+	]
+}

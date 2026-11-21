@@ -7,6 +7,7 @@ docs
 Brewfile
 MASfile
 Aptfile
+winget.json
 APPLICATIONS.md
 
 {{- if ne .chezmoi.os "darwin" }}
@@ -32,4 +33,41 @@ APPLICATIONS.md
 # Linux-only scripts.
 10-install-apt-packages.sh
 43-install-claude-code.sh
+{{- end }}
+
+{{- if ne .chezmoi.os "windows" }}
+
+# Windows-only scripts. chezmoi runs them with PowerShell (.chezmoi.toml.tmpl).
+10-install-winget-packages.ps1
+12-configure-windows-terminal.ps1
+{{- end }}
+
+{{- if eq .chezmoi.os "windows" }}
+
+# The Windows host is thin: git config, editorconfig, the winget list and
+# Windows Terminal. Everything POSIX lives in WSL, which applies the Linux
+# layer on its own. No bash here, so no .sh script runs, shared or not.
+.aliases
+.aws
+.config
+.curlrc
+.exports
+.functions
+.gdbinit
+.gitignore
+.gvimrc
+.hgignore
+.hushlogin
+.local
+.p10k.zsh
+.screenrc
+.ssh
+.tmux.conf
+.vim
+.vimrc
+.wgetrc
+.zsh_splash.zsh
+.zshenv
+.zshrc
+*.sh
 {{- end }}

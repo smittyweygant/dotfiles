@@ -1,0 +1,10 @@
+{{- /* chezmoi renders this into its own config file at `chezmoi init`. It is
+empty except on Windows, where it lets chezmoi run the .ps1 scripts: Windows
+PowerShell's default policy (Restricted) refuses every script file, and
+chezmoi's temporary copies are unsigned. Bypass applies to that one process
+only; the machine's policy is not changed. */ -}}
+{{- if eq .chezmoi.os "windows" }}
+[interpreters.ps1]
+    command = "powershell"
+    args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File"]
+{{- end }}

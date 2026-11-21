@@ -46,7 +46,9 @@ real work in WSL show it is needed.
 ## Scripts
 
 Target names, without the `run_*` prefix. Mac-only scripts are listed in
-`.chezmoiignore` off darwin; Linux-only ones off linux.
+`.chezmoiignore` off darwin; Linux-only ones off linux; the PowerShell ones
+off windows. On windows every `.sh` is ignored, shared or not: there is no
+bash to run them, and the host does not want what they install.
 
 | Script | Class | Why |
 |--------|-------|-----|
@@ -54,7 +56,9 @@ Target names, without the `run_*` prefix. Mac-only scripts are listed in
 | 06-enable-touchid-sudo | Mac-only | Touch ID and `/etc/pam.d/sudo_local`. |
 | 10-install-apt-packages | Linux-only | The Aptfile, pyenv, zsh as login shell. |
 | 10-install-packages | Mac-only | Homebrew and the Brewfile. |
+| 10-install-winget-packages | Windows-only | `winget import` of winget.json. PowerShell. |
 | 10-macos-defaults | Mac-only | `defaults write`. |
+| 12-configure-windows-terminal | Windows-only | Merges `init/windows-terminal.json` into Terminal's settings and makes WSL the default profile. Every apply, idempotent. |
 | 15-install-python | shared | pyenv from the Brewfile, or `~/.pyenv` on Linux. |
 | 20-install-mas-apps | Mac-only | Mac App Store. |
 | 20-install-zsh-framework | shared | `git clone` only. |
@@ -73,6 +77,16 @@ Target names, without the `run_*` prefix. Mac-only scripts are listed in
 | 55-seed-obs-keychain | Mac-only | macOS Keychain (`security`). |
 
 The WhisperX recorder and `~/.config/whisperx` are Mac-only too.
+
+## Windows host
+
+Windows gets `.gitconfig`, `.gitconfig-akka`, `.editorconfig` and the two
+scripts above; `.chezmoiignore` lists everything else off. Windows Terminal
+rewrites its `settings.json` itself, so the file is not a chezmoi target; the
+script merges a fragment into it instead. chezmoi needs `.chezmoi.toml.tmpl`
+to run `.ps1` scripts at all: Windows PowerShell's default execution policy
+is Restricted, and the template gives chezmoi's interpreter a per-process
+Bypass. The template renders empty on other systems.
 
 ## 1Password SSH
 
