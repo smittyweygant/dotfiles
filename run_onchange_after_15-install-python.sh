@@ -6,8 +6,11 @@ set -euo pipefail
 # behavior.
 readonly PYTHON_VERSION="3.12.8"
 
+# Homebrew puts pyenv on PATH; on Linux the apt script clones it here.
+[ -d "$HOME/.pyenv/bin" ] && export PATH="$HOME/.pyenv/bin:$PATH"
+
 if ! command -v pyenv >/dev/null 2>&1; then
-  echo "pyenv not found — install the Brewfile first"
+  echo "pyenv not found — install the Brewfile (Mac) or Aptfile (Linux) first"
   exit 1
 fi
 

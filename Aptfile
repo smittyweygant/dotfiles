@@ -1,0 +1,36 @@
+# Linux packages, one per line. run_onchange_10-install-apt-packages.sh reads
+# this file and re-runs when it changes. Comments and blank lines are ignored.
+
+# Shell and core tools
+zsh
+git
+curl
+vim
+tmux
+direnv
+fzf
+bat
+eza
+jq
+ripgrep
+locales
+python3
+
+# AWS CLI and SDKMAN installers
+unzip
+zip
+
+# pyenv builds Python from source
+build-essential
+libssl-dev
+zlib1g-dev
+libbz2-dev
+libreadline-dev
+libsqlite3-dev
+libncurses-dev
+xz-utils
+tk-dev
+libxml2-dev
+libxmlsec1-dev
+libffi-dev
+liblzma-dev

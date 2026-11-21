@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Blocks commits that put personal SSH hosts into the public repo.
-# private_dot_ssh/config may only contain `Host *` blocks; every other host
+# private_dot_ssh/config.tmpl may only contain `Host *` blocks; every other host
 # belongs in ~/.ssh/config.local, which is gitignored. Checks the staged
 # content, not the working tree.
 set -euo pipefail
 
-FILE=private_dot_ssh/config
+FILE=private_dot_ssh/config.tmpl
 
 git diff --cached --name-only | grep -qx "$FILE" || exit 0
 

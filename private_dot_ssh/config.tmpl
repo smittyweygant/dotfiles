@@ -13,5 +13,12 @@ Host *
 #  ControlPath /Users/smittyweygant/.ssh/sockets/%C
 #  ControlPath /Users/smittyweygant/.ssh/sockets/%r@%h-%p
 
+# 1Password's SSH agent socket. Under WSL, git runs Windows' ssh.exe instead
+# (see ~/.gitconfig), which talks to the Windows agent and reads the Windows
+# ~/.ssh/config, so this file sets no agent there.
 Host *
+{{- if eq .chezmoi.os "darwin" }}
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{- else if not (includeTemplate "is-wsl" .) }}
+  IdentityAgent ~/.1password/agent.sock
+{{- end }}

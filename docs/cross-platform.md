@@ -45,16 +45,17 @@ real work in WSL show it is needed.
 
 ## Scripts
 
-Target names, without the `run_*` prefix. Mac-only and Linux-pending scripts
-are listed in `.chezmoiignore` off darwin.
+Target names, without the `run_*` prefix. Mac-only scripts are listed in
+`.chezmoiignore` off darwin; Linux-only ones off linux.
 
 | Script | Class | Why |
 |--------|-------|-----|
 | 05-create-vim-dirs | shared | `mkdir` only. |
 | 06-enable-touchid-sudo | Mac-only | Touch ID and `/etc/pam.d/sudo_local`. |
-| 10-install-packages | Mac-only | Homebrew and the Brewfile. Linux gets its own apt script. |
+| 10-install-apt-packages | Linux-only | The Aptfile, pyenv, zsh as login shell. |
+| 10-install-packages | Mac-only | Homebrew and the Brewfile. |
 | 10-macos-defaults | Mac-only | `defaults write`. |
-| 15-install-python | needs Linux path | Expects pyenv from the Brewfile. |
+| 15-install-python | shared | pyenv from the Brewfile, or `~/.pyenv` on Linux. |
 | 20-install-mas-apps | Mac-only | Mac App Store. |
 | 20-install-zsh-framework | shared | `git clone` only. |
 | 25-install-awscli | shared | AWS's installer handles Linux; needs `unzip`. |
@@ -66,14 +67,22 @@ are listed in `.chezmoiignore` off darwin.
 | 40-install-claude-config | shared | bash, python3, git. |
 | 41-enable-git-hooks | shared | `git config`. |
 | 42-sync-ssh-pubkeys | shared | Skips without `op`. Needs bash 4 (`mapfile`). |
+| 43-install-claude-code | Linux-only | Native installer. Runs after claude-config so `~/.claude` is already its symlink. |
 | 45-clone-call-analysis-repos | Mac-only | Feeds the WhisperX recorder. |
 | 50-setup-call-analysis-venv | Mac-only | Same. |
 | 55-seed-obs-keychain | Mac-only | macOS Keychain (`security`). |
 
 The WhisperX recorder and `~/.config/whisperx` are Mac-only too.
 
-Shared files that still assume macOS, for phase 2:
+## 1Password SSH
 
-- `.ssh/config`: `IdentityAgent` points at the Mac 1Password socket.
-- `.aliases`, `.functions`: some use `open`, `pbcopy`, `osascript`, `brew`.
-  They fail only when called.
+`.chezmoitemplates/is-wsl` is the one WSL check. `.ssh/config` and
+`.gitconfig` read it:
+
+- Mac: `IdentityAgent` is the Group Containers socket.
+- Linux: `IdentityAgent` is `~/.1password/agent.sock`.
+- WSL: no `IdentityAgent`; git sets `core.sshCommand = ssh.exe`, which uses
+  the Windows agent and the Windows `~/.ssh/config`.
+
+`.aliases` and `.functions` still hold some Mac commands (`pbcopy`,
+`osascript`, `brew`). They fail only when called.

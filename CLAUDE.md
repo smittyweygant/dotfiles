@@ -17,7 +17,7 @@ org details.
 Gitignored or untracked files on each machine, recreated by hand:
 - `~/.ssh/config.local` — every SSH `Host` entry, including `github.com` and
   `github-akka` and their `IdentityFile` key names.
-  `private_dot_ssh/config` may hold only `Host *` blocks and must keep
+  `private_dot_ssh/config.tmpl` may hold only `Host *` blocks and must keep
   `Include config.local` as its first directive.
 - `~/.gitconfig.local` — this machine's git identity.
 - `~/.config/aws-sso/env` — AWS Identity Center details, written by
@@ -30,5 +30,5 @@ it from a script. Do not template it into a tracked file.
 
 ## Enforcement
 `init/git-hooks/pre-commit` rejects a commit that puts a `Host` entry other
-than `Host *` into `private_dot_ssh/config`.
+than `Host *` into `private_dot_ssh/config.tmpl`.
 `run_once_after_41-enable-git-hooks.sh` turns the hook on for each clone.
