@@ -1,0 +1,14 @@
+# winget.json hash: {{ include "winget.json" | sha256sum }}
+# Windows counterpart of the Homebrew bundle and the Aptfile. Re-runs whenever
+# winget.json changes. Installs what is missing and leaves installed packages
+# at their current version; `winget upgrade --all` is a separate, manual step.
+# Packages that are already installed count as success. A real failure fails
+# the apply, and chezmoi runs the script again next time.
+$ErrorActionPreference = 'Stop'
+
+$list = Join-Path $env:CHEZMOI_SOURCE_DIR 'winget.json'
+
+winget import --import-file $list `
+    --accept-package-agreements --accept-source-agreements `
+    --ignore-unavailable --no-upgrade
+exit $LASTEXITCODE

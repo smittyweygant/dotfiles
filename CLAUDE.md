@@ -24,6 +24,9 @@ Gitignored or untracked files on each machine, recreated by hand:
   `aws-sso-setup`.
 - `~/.aws/config` — seeded once by `create_private_config`; chezmoi never
   overwrites it.
+- The Windows `~/.ssh/config` — unmanaged on Windows. Both Windows git and WSL
+  git run Windows' `ssh.exe`, so every `Host` alias and `.pub` stub for that
+  machine lives there.
 
 When a task needs a new personal value, add or extend a `.local` file and read
 it from a script. Do not template it into a tracked file.
@@ -31,4 +34,5 @@ it from a script. Do not template it into a tracked file.
 ## Enforcement
 `init/git-hooks/pre-commit` rejects a commit that puts a `Host` entry other
 than `Host *` into `private_dot_ssh/config.tmpl`.
-`run_once_after_41-enable-git-hooks.sh` turns the hook on for each clone.
+`run_once_after_41-enable-git-hooks.sh` turns the hook on for each clone; its
+`.ps1` twin does so on Windows.
