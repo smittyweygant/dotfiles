@@ -34,4 +34,5 @@ it from a script. Do not template it into a tracked file.
 ## Enforcement
 `init/git-hooks/pre-commit` rejects a commit that puts a `Host` entry other
 than `Host *` into `private_dot_ssh/config.tmpl`.
-`run_once_after_41-enable-git-hooks.sh` turns the hook on for each clone.
+`run_once_after_41-enable-git-hooks.sh` turns the hook on for each clone; its
+`.ps1` twin does so on Windows.

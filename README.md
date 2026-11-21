@@ -84,13 +84,13 @@ The Windows host stays thin: git, the winget list and Windows Terminal. Developm
    winget install Git.Git twpayne.chezmoi
    chezmoi init --apply smittyweygant
    ```
-   This writes `~/.gitconfig`, `~/.gitconfig-akka` and `~/.editorconfig`, imports `winget.json` (packages already present are skipped), and merges `init/windows-terminal.json` into Windows Terminal's settings. Nothing POSIX lands here; `chezmoi managed` lists exactly what does.
-3. **Per-machine files:** `~/.gitconfig.local` as on the Mac, and the Windows `~/.ssh/config`. chezmoi does not manage the latter. It holds every `Host` alias, `github-akka` included, each with an `IdentityFile` pointing at a `.pub` stub, and both Windows git and WSL git read it (Linux step 4). Windows git uses the system `ssh.exe` (`core.sshCommand` in the tracked `.gitconfig`) because the copy bundled with Git for Windows cannot reach 1Password's agent pipe.
+   This writes `~/.gitconfig`, `~/.gitconfig-akka` and `~/.editorconfig`, imports `winget.json` (packages already present are skipped), merges `init/windows-terminal.json` into Windows Terminal's settings, and turns on the repo's git hooks for the clone. Nothing POSIX lands here; `chezmoi managed` lists exactly what does.
+3. **Per-machine files:** `~/.gitconfig.local` as on the Mac, and the Windows `~/.ssh/config`. chezmoi does not manage the latter. It holds every `Host` alias, `github-akka` included, each with an `IdentityFile` pointing at a `.pub` stub, and both Windows git and WSL git read it (Linux step 4). Windows git uses the system `ssh.exe` (`core.sshCommand` in the tracked `.gitconfig`) because the copy bundled with Git for Windows cannot reach 1Password's agent pipe. That is the **OpenSSH Client** optional feature; if `Get-Command ssh` finds nothing, add it with `Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0`.
 4. **Install WSL** and set up Ubuntu inside it with the Linux steps:
    ```powershell
    wsl --install -d Ubuntu-24.04
    ```
-   Open Windows Terminal once afterwards so it discovers the distro, then run `chezmoi apply` again: the Terminal script makes Ubuntu the default profile.
+   Open Windows Terminal once afterwards so it discovers the distro, then run `chezmoi apply` again: the Terminal script makes Ubuntu the default profile, as long as the default is still Terminal's own (a default you picked in the UI is left alone).
 5. **Verify:** `chezmoi diff` (only the Terminal script, which runs on every apply), `chezmoi managed` (no Mac or Linux files), `ssh -T git@github.com`, and a new Windows Terminal window opens in Ubuntu.
 
 To refresh the winget list from what is installed: `winget export -o winget.json --source winget`, then prune the runtimes and redistributables winget drags along (`Microsoft.VCRedist.*`, `Microsoft.UI.Xaml.*`, `Microsoft.WindowsAppRuntime.*` and the like) and review the diff before committing.

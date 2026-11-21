@@ -40,34 +40,21 @@ APPLICATIONS.md
 # Windows-only scripts. chezmoi runs them with PowerShell (.chezmoi.toml.tmpl).
 10-install-winget-packages.ps1
 12-configure-windows-terminal.ps1
+41-enable-git-hooks.ps1
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
 
 # The Windows host is thin: git config, editorconfig, the winget list and
 # Windows Terminal. Everything POSIX lives in WSL, which applies the Linux
-# layer on its own. No bash here, so no .sh script runs, shared or not.
-.aliases
-.aws
-.config
-.curlrc
-.exports
-.functions
-.gdbinit
-.gitignore
-.gvimrc
-.hgignore
-.hushlogin
-.local
-.p10k.zsh
-.screenrc
-.ssh
-.tmux.conf
-.vim
-.vimrc
-.wgetrc
-.zsh_splash.zsh
-.zshenv
-.zshrc
-*.sh
+# layer on its own. An allowlist, so a file added for the Mac or Linux later
+# stays off Windows unless it is named here. No bash here either, so no .sh
+# script runs, shared or not.
+*
+!.editorconfig
+!.gitconfig
+!.gitconfig-akka
+!10-install-winget-packages.ps1
+!12-configure-windows-terminal.ps1
+!41-enable-git-hooks.ps1
 {{- end }}

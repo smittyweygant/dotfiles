@@ -69,7 +69,7 @@ bash to run them, and the host does not want what they install.
 | 30-import-app-settings | Mac-only | iTerm and Dropbox under `/Applications`. |
 | 35-install-iterm-profile | Mac-only | iTerm. |
 | 40-install-claude-config | shared | bash, python3, git. |
-| 41-enable-git-hooks | shared | `git config`. |
+| 41-enable-git-hooks | shared | `git config`. A `.ps1` twin does the same on Windows. |
 | 42-sync-ssh-pubkeys | shared | Skips without `op`. Needs bash 4 (`mapfile`). |
 | 43-install-claude-code | Linux-only | Native installer. Runs after claude-config so `~/.claude` is already its symlink. |
 | 45-clone-call-analysis-repos | Mac-only | Feeds the WhisperX recorder. |
@@ -80,8 +80,9 @@ The WhisperX recorder and `~/.config/whisperx` are Mac-only too.
 
 ## Windows host
 
-Windows gets `.gitconfig`, `.gitconfig-akka`, `.editorconfig` and the two
-scripts above; `.chezmoiignore` lists everything else off. Windows Terminal
+Windows gets `.gitconfig`, `.gitconfig-akka`, `.editorconfig` and the three
+`.ps1` scripts; `.chezmoiignore` is an allowlist there, so anything added
+later stays off Windows unless named. Windows Terminal
 rewrites its `settings.json` itself, so the file is not a chezmoi target; the
 script merges a fragment into it instead. chezmoi needs `.chezmoi.toml.tmpl`
 to run `.ps1` scripts at all: Windows PowerShell's default execution policy
