@@ -16,6 +16,11 @@ if [[ ! -f "$CONFIG_LOCAL" ]]; then
     exit 0
 fi
 
+# Under WSL the CLI is Windows' op.exe (see .zshrc); use it when there is
+# no Linux op.
+if ! command -v op >/dev/null 2>&1 && command -v op.exe >/dev/null 2>&1; then
+    op() { op.exe "$@"; }
+fi
 if ! command -v op >/dev/null 2>&1; then
     echo "ssh: 1Password CLI ('op') not found - skipping pubkey sync" >&2
     exit 0

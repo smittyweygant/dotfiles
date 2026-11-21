@@ -4,6 +4,7 @@
 		{
 			"Packages": [
 				{ "PackageIdentifier": "AgileBits.1Password" },
+				{ "PackageIdentifier": "AgileBits.1Password.CLI" },
 				{ "PackageIdentifier": "Anaconda.Miniconda3" },
 				{ "PackageIdentifier": "Anthropic.Claude" },
 				{ "PackageIdentifier": "ArduinoSA.IDE.stable" },
