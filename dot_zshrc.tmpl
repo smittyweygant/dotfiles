@@ -80,6 +80,13 @@ export PATH="$HOME/.docker/bin:$PATH"
 # take precedence over any same-named aliases from plugins.
 [[ -f ~/.aliases ]] && source ~/.aliases
 [[ -f ~/.functions ]] && source ~/.functions
+{{- if includeTemplate "is-wsl" . }}
+
+# Under WSL the 1Password app and its CLI live on Windows (winget installs
+# the CLI; turn on "Integrate with 1Password CLI" in the app). WSL puts
+# Windows executables on PATH, so op.exe unlocks through the app.
+alias op=op.exe
+{{- end }}
 
 # Per-project secrets (e.g. ANTHROPIC_API_KEY) load lazily via direnv's
 # .envrc in the projects that need them, instead of eagerly for every
