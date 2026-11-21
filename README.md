@@ -16,7 +16,7 @@ Personal macOS, Linux (including WSL2) and Windows toolchain and configuration, 
 - `Brewfile` + `run_onchange_10-install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
 - `Aptfile` + `run_onchange_10-install-apt-packages.sh.tmpl` — Linux only: apt packages, pyenv, and zsh as the login shell. Re-runs when the Aptfile changes.
 - `run_once_after_43-install-claude-code.sh` — Linux only: Claude Code's native installer, run after claude-config.
-- `winget.json` + `run_onchange_10-install-winget-packages.ps1.tmpl` — Windows only: the winget package list, imported whenever it changes. `init/windows-terminal.json` + `run_after_12-configure-windows-terminal.ps1` merge a few Windows Terminal settings into its `settings.json` and make the WSL distro the default profile. `.chezmoi.toml.tmpl` records `sourceDir` on every OS and, on Windows, lets chezmoi run `.ps1` scripts past PowerShell's default execution policy.
+- `winget.json` + `run_onchange_10-install-winget-packages.ps1.tmpl` — Windows only: the winget package list, imported whenever it changes. `run_once_after_60-install-wsl.ps1` installs WSL2 with Ubuntu 24.04 when no distro exists. `init/windows-terminal.json` + `run_after_12-configure-windows-terminal.ps1` merge a few Windows Terminal settings into its `settings.json` and make the WSL distro the default profile. `.chezmoi.toml.tmpl` records `sourceDir` on every OS and, on Windows, lets chezmoi run `.ps1` scripts past PowerShell's default execution policy.
 - `run_onchange_after_15-install-python.sh` — installs the Python version used by project `.python-version` files through pyenv, without changing pyenv's global version.
 - `MASfile` + `run_onchange_20-install-mas-apps.sh.tmpl` — Mac App Store apps via [`mas`](https://github.com/mas-cli/mas).
 - `APPLICATIONS.md` — apps installed outside Homebrew/the App Store (direct download, MDM) that can't be scripted; a manual-reinstall checklist.
@@ -84,13 +84,9 @@ The Windows host stays thin: git, the winget list and Windows Terminal. Developm
    winget install Git.Git twpayne.chezmoi
    chezmoi init --apply smittyweygant
    ```
-   This writes `~/.gitconfig`, `~/.gitconfig-akka` and `~/.editorconfig`, imports `winget.json` (packages already present are skipped), merges `init/windows-terminal.json` into Windows Terminal's settings, and turns on the repo's git hooks for the clone. Nothing POSIX lands here; `chezmoi managed` lists exactly what does.
+   This writes `~/.gitconfig`, `~/.gitconfig-akka` and `~/.editorconfig`, imports `winget.json` (packages already present are skipped), merges `init/windows-terminal.json` into Windows Terminal's settings, turns on the repo's git hooks for the clone, and installs WSL with Ubuntu 24.04 if it is missing (step 4). Nothing POSIX lands here; `chezmoi managed` lists exactly what does.
 3. **Per-machine files:** `~/.gitconfig.local` as on the Mac, and the Windows `~/.ssh/config`. chezmoi does not manage the latter. It holds every `Host` alias, `github-akka` included, each with an `IdentityFile` pointing at a `.pub` stub, and both Windows git and WSL git read it (Linux step 4). Windows git uses the system `ssh.exe` (`core.sshCommand` in the tracked `.gitconfig`) because the copy bundled with Git for Windows cannot reach 1Password's agent pipe. That is the **OpenSSH Client** optional feature; if `Get-Command ssh` finds nothing, add it with `Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0`.
-4. **Install WSL** and set up Ubuntu inside it with the Linux steps:
-   ```powershell
-   wsl --install -d Ubuntu-24.04
-   ```
-   Open Windows Terminal once afterwards so it discovers the distro, then run `chezmoi apply` again: the Terminal script makes Ubuntu the default profile, as long as the default is still Terminal's own (a default you picked in the UI is left alone).
+4. **WSL.** The apply in step 2 also runs `wsl --install -d Ubuntu-24.04` when no distro exists (expect a UAC prompt, and reboot if Windows asks). Open Ubuntu once to create the Linux user, then follow the [Linux and WSL2 setup](#linux-and-wsl2-setup) inside it. Open Windows Terminal once so it discovers the distro, then run `chezmoi apply` again on the Windows side: the Terminal script makes Ubuntu the default profile, as long as the default is still Terminal's own (a default you picked in the UI is left alone).
 5. **Verify:** `chezmoi diff` (only the Terminal script, which runs on every apply), `chezmoi managed` (no Mac or Linux files), `ssh -T git@github.com`, and a new Windows Terminal window opens in Ubuntu.
 
 To refresh the winget list from what is installed: `winget export -o winget.json --source winget`, then prune the runtimes and redistributables winget drags along (`Microsoft.VCRedist.*`, `Microsoft.UI.Xaml.*`, `Microsoft.WindowsAppRuntime.*` and the like) and review the diff before committing.

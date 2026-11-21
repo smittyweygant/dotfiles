@@ -41,6 +41,7 @@ APPLICATIONS.md
 10-install-winget-packages.ps1
 12-configure-windows-terminal.ps1
 41-enable-git-hooks.ps1
+60-install-wsl.ps1
 {{- end }}
 
 {{- if eq .chezmoi.os "windows" }}
@@ -57,4 +58,5 @@ APPLICATIONS.md
 !10-install-winget-packages.ps1
 !12-configure-windows-terminal.ps1
 !41-enable-git-hooks.ps1
+!60-install-wsl.ps1
 {{- end }}
