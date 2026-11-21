@@ -63,7 +63,9 @@ $fragmentPath = Join-Path $env:CHEZMOI_SOURCE_DIR 'init\windows-terminal.json'
 Merge-Into $settings (Get-Content -LiteralPath $fragmentPath -Raw | ConvertFrom-Json)
 
 # Terminal generates one profile per WSL distro, with per-machine GUIDs, so the
-# default is chosen by source rather than hard-coded. Ubuntu wins if present.
+# default is chosen by source rather than hard-coded. Older Terminal builds
+# tag them Windows.Terminal.Wsl; the WSL package itself (3.x) tags them
+# Microsoft.WSL. Ubuntu wins if present.
 # The default changes only while it is still Terminal's own: unset, pointing at
 # a profile that no longer exists, or the factory Windows PowerShell profile.
 # A default picked by hand in the UI is left alone.
@@ -72,7 +74,7 @@ $profiles = @($settings.profiles.list)
 $current = $settings.defaultProfile
 $stillFactory = (-not $current) -or ($current -eq $factoryDefault) -or
     (-not ($profiles | Where-Object { $_.guid -eq $current }))
-$wsl = @($profiles | Where-Object { $_.source -eq 'Windows.Terminal.Wsl' -and -not $_.hidden })
+$wsl = @($profiles | Where-Object { $_.source -in @('Windows.Terminal.Wsl', 'Microsoft.WSL') -and -not $_.hidden })
 if ($wsl.Count -eq 0) {
     Write-Output 'windows-terminal: no WSL profile yet; default profile left as is.'
 } elseif ($stillFactory) {
