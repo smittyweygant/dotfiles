@@ -1,0 +1,25 @@
+# Ghostty config. Reload with Cmd+Shift+, ; check with `ghostty +validate-config`.
+# Every option: `ghostty +show-config --default --docs`.
+
+# Follow the macOS appearance. Browse others with `ghostty +list-themes`.
+theme = light:iTerm2 Solarized Light,dark:iTerm2 Solarized Dark
+
+# Nerd Font glyphs for the prompt. The cask comes from the Brewfile.
+font-family = Hack Nerd Font Mono
+font-size = 14
+
+window-width = 110
+window-height = 32
+
+# Slightly see-through, with the backdrop blurred so text stays readable.
+background-opacity = 0.92
+background-blur = 20
+
+# Bytes, not lines.
+scrollback-limit = 50000000
+
+# Option acts as Alt, so Alt-b and Alt-f move by word in zsh.
+macos-option-as-alt = true
+
+# Drop-down terminal on Ctrl+`, from any app.
+keybind = global:ctrl+grave_accent=toggle_quick_terminal

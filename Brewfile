@@ -93,6 +93,8 @@ cask "docker-desktop"
 cask "font-hack-nerd-font"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
+# GPU-accelerated terminal emulator, on trial as an iTerm2 alternative
+cask "ghostty"
 # Knowledge base that works on top of a local folder of plain text Markdown files
 cask "obsidian"
 # JDK from the Eclipse Foundation (Adoptium)
