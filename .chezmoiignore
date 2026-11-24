@@ -15,6 +15,7 @@ APPLICATIONS.md
 # Mac-only files and scripts. docs/cross-platform.md classifies every script.
 # Scripts match by target name: the source name without its run_* prefix.
 .config/whisperx
+.config/ghostty
 .local/bin/whisperx-recorder
 06-enable-touchid-sudo.sh
 10-macos-defaults.sh

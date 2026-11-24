@@ -13,6 +13,7 @@ Personal macOS, Linux (including WSL2) and Windows toolchain and configuration, 
 - `run_once_after_26-configure-aws-sso.sh` — prompts for your AWS Identity Center details and adds the SSO profiles; see [AWS credentials](#aws-credentials).
 - `run_once_after_30-import-app-settings.sh.tmpl` — iTerm2 color preset and other tweaks that need the apps installed first.
 - `run_onchange_after_35-install-iterm-profile.sh.tmpl` — installs `init/iterm-profile.json` as an iTerm2 Dynamic Profile (font, keybindings, cursor, window behavior — everything the `.itermcolors` preset alone doesn't cover). Re-runs when the profile JSON changes. See [iTerm2 profile](#iterm2-profile) for the export flow.
+- `dot_config/ghostty/config` — Ghostty's config (theme, font, opacity, quick-terminal key). The app comes from the Brewfile. Mac only; it is on trial next to iTerm2.
 - `Brewfile` + `run_onchange_10-install-packages.sh.tmpl` — Homebrew formulae/casks, reinstalled automatically whenever the Brewfile changes.
 - `Aptfile` + `run_onchange_10-install-apt-packages.sh.tmpl` — Linux only: apt packages, pyenv, and zsh as the login shell. Re-runs when the Aptfile changes.
 - `run_once_after_43-install-claude-code.sh` — Linux only: Claude Code's native installer, run after claude-config.
